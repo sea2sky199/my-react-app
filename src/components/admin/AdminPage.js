@@ -1,17 +1,17 @@
-import React, { Component } from 'react'
-import { withRouter } from 'react-router-dom'
+import React from 'react'
+import { useLocation } from 'react-router-dom'
 import { UsersTableContainer } from '../../components'
 import { trackPageView } from '../../utilities'
 import './admin.css'
 
-function AdminPage({location}) {
+function AdminPage() {
+  const location = useLocation()
+
   React.useEffect(() => {
-    // matomo tracking
-        let currentUrl = location.pathname
-        trackPageView(currentUrl, 'Compound Match - Admin')
-  }, []);
+    trackPageView(location.pathname, 'Compound Match - Admin')
+  }, [location.pathname]);
 
   return <UsersTableContainer title={'Manage Users'} />;
 }
 
-export default withRouter(AdminPage)
+export default AdminPage
