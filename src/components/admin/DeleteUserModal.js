@@ -1,4 +1,4 @@
-import React, { Component } from 'react'
+import React from 'react'
 import './admin.css'
 
 import { AdminModalShell } from '..'
@@ -9,7 +9,7 @@ function DeleteUserModal({userInfo, closeModal}) {
   const [isPending, setIsPending] = React.useState(false);
   const [error, setError] = React.useState(false);
 
-  const deleteUser = () => {
+  const deleteUser = async () => {
         try {
             setIsPending(true)
             console.log(`Deleting userId:${userInfo.id}`)
@@ -19,10 +19,12 @@ function DeleteUserModal({userInfo, closeModal}) {
                 userInfo.id,
                 'delete'
             )
-            this.setState({ isPending: false, error: false })
+            setIsPending(false)
+            setError(false)
             closeModal(true)
         } catch (err) {
-            this.setState({ isPending: false, error: true })
+            setIsPending(false)
+            setError(true)
             console.log('Unable to delete user', err)
         }
     };
