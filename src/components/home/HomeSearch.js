@@ -1,4 +1,4 @@
-import React, { PureComponent } from 'react'
+import React from 'react'
 
 import { ClickableDiv } from '..'
 import { handleKeyDown } from '../../utilities'
@@ -8,23 +8,16 @@ import { ic_search } from 'react-icons-kit/md/ic_search'
 import { ic_close } from 'react-icons-kit/md/ic_close'
 import './home.css'
 
-class HomeSearch extends PureComponent {
-    constructor(props) {
-        super(props)
+function HomeSearch({reroute}) {
+  const [searchInput, setSearchInput] = React.useState('');
 
-        this.state = {
-            searchInput: ''
-        }
-    }
-
-    getcompoundNumberRerouteURL = () => {
+  const getcompoundNumberRerouteURL = () => {
         return `/compounds?search=compoundNumber,${encodeURIComponent(
-            this.state.searchInput.toUpperCase()
+            searchInput.toUpperCase()
         )}`
     }
 
-    render() {
-        return (
+  return (
             <div className="home-search-container flex-column align-center letter-spacing">
                 <div className="h00 semi-bold" style={{ paddingTop: '16vh' }}>
                     Looking for a compound?
@@ -45,25 +38,19 @@ class HomeSearch extends PureComponent {
                     <input
                         className="home-search-input h3"
                         type={'search'}
-                        value={this.state.searchInput}
-                        onChange={e =>
-                            this.setState({
-                                searchInput: e.target.value
-                            })
-                        }
+                        value={searchInput}
+                        onChange={e => setSearchInput(e.target.value)}
                         onKeyDown={e => {
-                            if (!!this.state.searchInput.length) {
+                            if (!!searchInput.length) {
                                 handleKeyDown(e, () =>
-                                    this.props.reroute(
-                                        this.getcompoundNumberRerouteURL()
-                                    )
+                                    reroute(getcompoundNumberRerouteURL())
                                 )
                             }
                         }}
                     />
                     <Icon
                         className={
-                            !!this.state.searchInput.length
+                            !!searchInput.length
                                 ? 'fadeOut'
                                 : 'fadeIn'
                         }
@@ -73,23 +60,21 @@ class HomeSearch extends PureComponent {
                     />
                     <Icon
                         className={
-                            !!this.state.searchInput.length
+                            !!searchInput.length
                                 ? 'pointer fadeIn'
                                 : 'fadeOut'
                         }
                         style={{ marginLeft: '-1.5rem' }}
                         icon={ic_close}
                         size="26"
-                        onClick={() => this.setState({ searchInput: '' })}
+                        onClick={() => setSearchInput('')}
                     />
-                    {!!this.state.searchInput.length && (
+                    {!!searchInput.length && (
                         <div className="home-search-results-container h3">
                             <ClickableDiv
                                 classNameArr={['home-search-result']}
                                 clickAction={() =>
-                                    this.props.reroute(
-                                        this.getcompoundNumberRerouteURL()
-                                    )
+                                    reroute(getcompoundNumberRerouteURL())
                                 }
                             >
                                 View All Results
@@ -99,7 +84,6 @@ class HomeSearch extends PureComponent {
                 </div>
             </div>
         )
-    }
 }
 
 export default HomeSearch
