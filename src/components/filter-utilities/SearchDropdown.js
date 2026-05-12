@@ -1,4 +1,4 @@
-import React, { Component } from 'react'
+import React from 'react'
 
 import { ClickableDiv, FilterCaption } from '..'
 import {
@@ -8,29 +8,38 @@ import {
 } from '../../utilities'
 
 function SearchDropdown({options, activeFilters, filterMethod, grouping, isSelfContained}) {
-  const [options, setOptions] = React.useState(this.options || []);
   const [searchInput, setSearchInput] = React.useState('');
   const [openOverride, setOpenOverride] = React.useState(false);
-  const [open, setOpen] = React.useState(null);
+  const [open, setOpen] = React.useState(false);
   const dropdownContainer = React.useRef(null);
+
+  const handleClick = React.useCallback((e) => {
+    if (dropdownContainer.current && !dropdownContainer.current.contains(e.target)) {
+      setOpenOverride(false)
+      setOpen(false)
+    }
+  }, []);
+
   React.useEffect(() => {
     document.addEventListener('mousedown', handleClick, false)
-    
     return () => {
       document.removeEventListener('mousedown', handleClick, false)
     };
-  }, []);
+  }, [handleClick]);
 
-  const updateFilter = (filter, grouping) => {
-        const activeFilters = activeFilters
+  const formatGroupingTitle = (grouping) => {
+        return toTitleCase(camelToHumanCase(grouping))
+    };
+
+  const updateFilter = (filter, filterGrouping) => {
         if (activeFilters.includes(filter)) {
-            filterMethod(filter, grouping, true)
+            filterMethod(filter, filterGrouping, true)
         } else {
-            filterMethod(filter, grouping, false)
+            filterMethod(filter, filterGrouping, false)
         }
     };
 
-  const getSearchFilteredUnselectedOptions = () => options.filter(
+  const getSearchFilteredUnselectedOptions = () => (options || []).filter(
             option =>
                 !activeFilters.includes(option) &&
                 option

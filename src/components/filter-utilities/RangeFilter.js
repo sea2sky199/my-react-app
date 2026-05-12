@@ -1,4 +1,4 @@
-import React, { Component, Fragment } from 'react'
+import React, { Fragment } from 'react'
 
 import 'rheostat/initialize'
 import Rheostat from 'rheostat'
@@ -6,63 +6,71 @@ import Rheostat from 'rheostat'
 import _ from 'lodash'
 
 function RangeFilter({range, activeRange, updateRangeMethod, grouping}) {
-  const [range, setRange] = React.useState(max - min);
-  const [minRange, setMinRange] = React.useState(min);
-  const [maxRange, setMaxRange] = React.useState(max);
-  const [minInput, setMinInput] = React.useState(activeRange[0]);
-  const [maxInput, setMaxInput] = React.useState(activeRange[1]);
-  const [open, setOpen] = React.useState(false);
-  React.useEffect(() => {
-    const didActiveRangeUpdate = !_.isEqual(
-            activeRange,
-            activeRange
-        )
-        if (didActiveRangeUpdate) {
-            let activeRange = activeRange || range
-            updateInputValues(activeRange)
-        }
-  }, [range, activeRange, updateRangeMethod, grouping]);
+  const { min = 0, max = 100 } = range || {}
 
-  inputOnChange = _.debounce((min, max) => {
-        let minUpdate = min
-        let maxUpdate = max
-        let activeRange = activeRange || [
-            minRange,
-            maxRange
-        ]
-        if (!min || min > maxInput) {
-            minUpdate = activeRange[0]
+  const [minRange] = React.useState(min);
+  const [maxRange] = React.useState(max);
+  const [minInput, setMinInput] = React.useState(activeRange ? activeRange[0] : min);
+  const [maxInput, setMaxInput] = React.useState(activeRange ? activeRange[1] : max);
+
+  const roundRangeToHundreths = (rangeArr) => {
+        return rangeArr.map(val => Math.round(val * 100) / 100)
+    };
+
+  const realValToPercent = (val) => {
+        if (maxRange === minRange) return 0
+        return ((val - minRange) / (maxRange - minRange)) * 100
+    };
+
+  const percentToRealVal = (percent) => {
+        return minRange + (percent / 100) * (maxRange - minRange)
+    };
+
+  const updateValues = (rangeArr) => {
+        updateRangeMethod(grouping, rangeArr)
+    };
+
+  const updateInputValues = (rangeArr, persistChange = false) => {
+        if (persistChange) {
+            updateValues(rangeArr)
+        }
+        const rounded = roundRangeToHundreths(rangeArr)
+        setMinInput(rounded[0])
+        setMaxInput(rounded[1])
+    };
+
+  React.useEffect(() => {
+        const rangeToUse = activeRange || [minRange, maxRange]
+        updateInputValues(rangeToUse)
+  }, [activeRange]);
+
+  const inputOnChange = _.debounce((minVal, maxVal) => {
+        let minUpdate = minVal
+        let maxUpdate = maxVal
+        const currentRange = activeRange || [minRange, maxRange]
+        if (!minVal || minVal > maxInput) {
+            minUpdate = currentRange[0]
         }
         if (minUpdate < minRange) {
             minUpdate = minRange
         }
-
-        if (!max || max < minInput) {
-            maxUpdate = activeRange[1]
+        if (!maxVal || maxVal < minInput) {
+            maxUpdate = currentRange[1]
         }
         if (maxUpdate > maxRange) {
             maxUpdate = maxRange
         }
-
-        this.updateInputValues([minUpdate, maxUpdate], true)
+        updateInputValues([minUpdate, maxUpdate], true)
     }, 1500)
 
-  const updateInputValues = (range, persistChange = false) => {
-        if (persistChange) {
-            updateValues(range)
-        }
-        range = roundRangeToHundreths(range)
-        this.setState({ minInput: range[0], maxInput: range[1] })
-    };
-
-  const activeRange = activeRange || []
+  const currentActiveRange = activeRange || []
 
         const values = [
             realValToPercent(
-                activeRange.length ? activeRange[0] : minRange
+                currentActiveRange.length ? currentActiveRange[0] : minRange
             ),
             realValToPercent(
-                activeRange.length ? activeRange[1] : maxRange
+                currentActiveRange.length ? currentActiveRange[1] : maxRange
             )
         ]
 
@@ -71,17 +79,17 @@ function RangeFilter({range, activeRange, updateRangeMethod, grouping}) {
                 <div className="range-selection-container">
                     <Rheostat
                         values={values}
-                        onChange={({ values }) => {
-                            values = values.map(percent =>
+                        onChange={({ values: rheostatValues }) => {
+                            const realValues = rheostatValues.map(percent =>
                                 percentToRealVal(percent)
                             )
-                            updateValues(values)
+                            updateValues(realValues)
                         }}
-                        onValuesUpdated={({ values }) => {
-                            values = values.map(percent =>
+                        onValuesUpdated={({ values: rheostatValues }) => {
+                            const realValues = rheostatValues.map(percent =>
                                 percentToRealVal(percent)
                             )
-                            updateInputValues(values, false)
+                            updateInputValues(realValues, false)
                         }}
                     />
                 </div>

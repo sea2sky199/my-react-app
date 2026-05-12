@@ -1,4 +1,4 @@
-import React, { Component } from 'react'
+import React from 'react'
 
 import { hasClass } from '../../utilities'
 
@@ -9,7 +9,7 @@ const SliderStops = ({
 }) => (
     <div className="slider-stops">
         {values.map((value, i) => (
-            <div 
+            <div
                 onClick={() => changed(value, i)}
                 key={i}
                 id={`slider-stop-${i}-${value}`}
@@ -30,28 +30,22 @@ const SliderTrack = ({
 
 export default function Slider({id, name, classNames, values, changed, width}) {
   const [index, setIndex] = React.useState(0);
-  const [changed, setChanged] = React.useState(null);
-  const [values, setValues] = React.useState(null);
-  const [classNames, setClassNames] = React.useState(null);
-  const [width, setWidth] = React.useState(null);
   const inputRef = React.useRef(null);
 
-  const rangeChanged = (index) => {
-        this.setState({ index })
-
-        changed(values[index])
+  const rangeChanged = (newIndex) => {
+        setIndex(newIndex)
+        changed(values[newIndex])
     };
 
-  const stopChanged = (value, index) => {
-        if (index !== index) {
-            this.setState({ index })
-    
+  const stopChanged = (value, stopIndex) => {
+        if (stopIndex !== index) {
+            setIndex(stopIndex)
             changed(value)
         }
     };
 
   return (
-            <div 
+            <div
                 className={['stepped-slider', ...classNames].join(' ')}
                 style={{width: width}}
                 onMouseDown={() => inputRef.current.classList.add('focus')}

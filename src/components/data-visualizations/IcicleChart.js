@@ -1,5 +1,5 @@
-import React, { Component } from 'react'
-import { withRouter } from 'react-router-dom'
+import React from 'react'
+import { useLocation } from 'react-router-dom'
 import './data-visualizations.css'
 
 import {
@@ -17,56 +17,15 @@ import 'd3-transition'
 
 import { debounce } from 'lodash'
 
-function IcicleChart({location, data, reroute}) {
+function IcicleChart({data, reroute}) {
+  const location = useLocation();
   const [boundingRect, setBoundingRect] = React.useState({});
   const [loaded, setLoaded] = React.useState(false);
   const canvas = React.useRef(null);
-  React.useEffect(() => {
-    let debouncedResize;
-    handleCanvasResize()
-        debouncedResize = debounce(handleCanvasResize, 100)
-        window.addEventListener('resize', debouncedResize, false)
 
-        // matomo tracking
-        let currentUrl = location.pathname
-        trackPageView(currentUrl, 'Compound Match - Explore')
-    
-    return () => {
-      window.removeEventListener('resize', debouncedResize, false)
-    };
-  }, []);
-  React.useEffect(() => {
-    if (loaded) {
-            createChart()
-        }
-  }, [location, data, reroute, loaded]);
+  const colorOrdinal = React.useRef(getColorScaleOrdinal(interpolateRainbow, 8)).current;
 
-  function shouldComponentUpdate(nextProps, nextState) {
-        const nextRect = nextState.boundingRect
-        const didSvgSizeChange =
-            boundingRect.width !== nextRect.width ||
-            boundingRect.height !== nextRect.height
-
-        if (didSvgSizeChange) {
-            return true
-        }
-        return false
-    }
-
-  const handleCanvasResize = () => {
-        const boundingRect = canvas.current.getBoundingClientRect()
-        this.setState({ boundingRect, loaded: true })
-    };
-
-  colorOrdinal = getColorScaleOrdinal(interpolateRainbow, 8)
-
-  const cleanOldSvg = () => {
-        select('.canvas')
-            .selectAll('svg')
-            .remove()
-    };
-
-  accessorConfig = {
+  const accessorConfig = {
         sizeCode: {
             sort: (a, b) => stringCompare(a.data.name, b.data.name),
             format: d => `SIZE CODE ${d.data.name.toUpperCase()}`
@@ -80,6 +39,51 @@ function IcicleChart({location, data, reroute}) {
             format: d => `SIZE SUB CODE ${d.data.name.toUpperCase()}`
         }
     }
+
+  const handleCanvasResize = () => {
+        if (canvas.current) {
+            const rect = canvas.current.getBoundingClientRect()
+            setBoundingRect(rect)
+            setLoaded(true)
+        }
+    };
+
+  React.useEffect(() => {
+    handleCanvasResize()
+        const debouncedResize = debounce(handleCanvasResize, 100)
+        window.addEventListener('resize', debouncedResize, false)
+        trackPageView(location.pathname, 'Compound Match - Explore')
+
+    return () => {
+      window.removeEventListener('resize', debouncedResize, false)
+    };
+  }, []);
+
+  React.useEffect(() => {
+    if (loaded) {
+            createChart()
+        }
+  }, [loaded, data]);
+
+  const getRectHeight = (d) => d.x1 - d.x0;
+
+  const willLabelFit = (d) => getRectHeight(d) > 16;
+
+  const formatCellName = (d) => {
+        const config = accessorConfig[d.data.grouping]
+        if (config) return config.format(d)
+        return d.data.name ? d.data.name.toUpperCase() : ''
+    };
+
+  const getFilterQuery = (nodeData) => {
+        return nodeData.filterParameterArray || []
+    };
+
+  const cleanOldSvg = () => {
+        select('.canvas')
+            .selectAll('svg')
+            .remove()
+    };
 
   const buildRootDataHierarchy = () => {
         const root = hierarchy(data)
@@ -138,7 +142,7 @@ function IcicleChart({location, data, reroute}) {
         const root = buildRootDataHierarchy()
         let focusedRect = root
 
-        const zoomableClick = rectInfo => {
+        const zoomableClick = (event, rectInfo) => {
             const isFocusSameAsClicked = focusedRect === rectInfo
             const doesSelectedHaveParent = !!rectInfo.parent
             focusedRect =
@@ -226,14 +230,13 @@ function IcicleChart({location, data, reroute}) {
             .text(d => d.value.toLocaleString())
     };
 
-  const clickTitleFilter = ({ data }) => {
-        const filterQuery = getFilterQuery(data)
-        const queryString = filterQuery ? `?${filterQuery.join('&')}` : ''
-
+  const clickTitleFilter = (event, d) => {
+        const filterQuery = getFilterQuery(d.data)
+        const queryString = filterQuery.length ? `?${filterQuery.join('&')}` : ''
         reroute(`/compounds${queryString}`)
     };
 
   return <div className="canvas" ref={canvas}></div>;
 }
 
-export default withRouter(IcicleChart)
+export default IcicleChart

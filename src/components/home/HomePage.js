@@ -1,6 +1,5 @@
-import React, { Component } from 'react'
-import { observer, inject } from 'mobx-react'
-import { withRouter } from 'react-router-dom'
+import React from 'react'
+import { useNavigate, useLocation } from 'react-router-dom'
 
 import apiService from '../../data/ApiService'
 
@@ -9,21 +8,17 @@ import { siteName, trackPageView } from '../../utilities'
 import HomeSearch from './HomeSearch'
 import './home.css'
 
-function HomePage({userInfoStore, location, history}) {
-  const [name, setName] = React.useState(name);
+function HomePage({userInfoStore}) {
+  const navigate = useNavigate();
+  const location = useLocation();
+
+  const name = userInfoStore && userInfoStore.userInfo ? userInfoStore.userInfo.name : ''
+
   const [data, setData] = React.useState({});
   const [isSearchView, setIsSearchView] = React.useState(true);
   const [loading, setLoading] = React.useState(true);
-  React.useEffect(() => {
-    let res;
-    // matomo tracking
-        let currentUrl = location.pathname
-        trackPageView(currentUrl, 'Compound Match - Home')
 
-        apiService.get('compoundsExplore').then(res => {
-            buildDataHeirarchy(res)
-        })
-  }, []);
+  const reroute = (path) => navigate(path);
 
   const addFilterNavigationArray = (data, filterParameterArray = []) => {
         if (data.grouping) {
@@ -38,6 +33,12 @@ function HomePage({userInfoStore, location, history}) {
         )
     };
 
+  const buildDataHeirarchy = (res) => {
+        addFilterNavigationArray(res)
+        setData(res)
+        setLoading(false)
+    };
+
   const indexOfName = (array, name) => {
         for (let i = 0; i < array.length; i++) {
             if (array[i].name === name) {
@@ -46,6 +47,13 @@ function HomePage({userInfoStore, location, history}) {
         }
         return -1
     };
+
+  React.useEffect(() => {
+        trackPageView(location.pathname, 'Compound Match - Home')
+        apiService.get('compoundsExplore').then(res => {
+            buildDataHeirarchy(res)
+        })
+  }, []);
 
   const renderHomeTab = (title, onClickCallback, isActive) => {
         const classNamesArr = ['home-tab', 'letter-spacing']
@@ -100,4 +108,4 @@ function HomePage({userInfoStore, location, history}) {
         );
 }
 
-export default withRouter(inject('userInfoStore')(observer(HomePage)))
+export default HomePage

@@ -1,25 +1,7 @@
-import React, { Component, Fragment } from 'react'
+import React, { Fragment } from 'react'
 import { InfiniteTable, CompoundTableHeadingRow, CompoundRow } from '..'
 
 function CompoundsTableContainer({data, accessors, isSimilarityView, comparisonMethod, sort, updateSort, filterOptions, filterRanges, getSearchAndFilterCriteria, updateFilter, updateSearch, updateFilterRange, retrieveData, getScrollParent, totalDataLength, compoundNumberSearchLimit}) {
-  const [rows, setRows] = React.useState(this.renderRows(this.data, this.accessors));
-  const prevAccessorsRef = React.useRef();
-  const prevDataRef = React.useRef();
-  React.useEffect(() => {
-    // TODO: add windowing here
-        if (
-            prevAccessorsRef.current && prevAccessorsRef.current !== accessors ||
-            prevDataRef.current && prevDataRef.current !== data
-        ) {
-            const newRows = renderRows(
-                data,
-                accessors
-            )
-            setRows(newRows)
-        }
-    prevAccessorsRef.current = accessors;
-    prevDataRef.current = data;
-  }, [data, accessors, isSimilarityView, comparisonMethod, sort, updateSort, filterOptions, filterRanges, getSearchAndFilterCriteria, updateFilter, updateSearch, updateFilterRange, retrieveData, getScrollParent, totalDataLength, compoundNumberSearchLimit]);
 
   const renderRows = (data, headings) => {
         return data.map(compoundInfo => (
@@ -31,6 +13,11 @@ function CompoundsTableContainer({data, accessors, isSimilarityView, comparisonM
             />
         ))
     };
+
+  const rows = React.useMemo(
+        () => renderRows(data, accessors),
+        [data, accessors, isSimilarityView]
+    );
 
   return (
             <Fragment>

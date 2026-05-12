@@ -1,4 +1,4 @@
-import React, { Component } from 'react'
+import React from 'react'
 import ReactDOM from 'react-dom'
 import './modal.css'
 
@@ -10,16 +10,19 @@ const modalRoot = document.getElementById('modal-root')
 function ModalShell({closeModal, backdropStyle, containerStyle, headerStyle, header, style, isLoading, errorMessage, body}) {
   const [showing, setShowing] = React.useState(false);
   const [hiding, setHiding] = React.useState(false);
-  const [closeEvent, setCloseEvent] = React.useState(null);
   React.useEffect(() => {
     setTimeout(() => {
             setShowing(true)
         }, 100)
   }, []);
 
+  const willCloseModal = () => {
+        setHiding(true)
+    };
+
   const completeEvent = () => {
         if (hiding) {
-            closeModal(closeEvent)
+            closeModal()
         }
     };
 

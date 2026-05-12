@@ -1,5 +1,5 @@
-import React, { Component } from 'react'
-import { withRouter } from 'react-router-dom'
+import React from 'react'
+import { useLocation, useNavigate } from 'react-router-dom'
 import './data-visualizations.css'
 import placeholder from '../../images/compoundPlaceholderListView.svg'
 import {
@@ -13,55 +13,51 @@ import { axisLeft, axisBottom } from 'd3-axis'
 
 import { debounce } from 'lodash'
 
-function OpportunityChart({location, data, yAxis, xAxis}) {
-  const [margin, setMargin] = React.useState(this.defaultMargin);
+const defaultMargin = { top: 20, right: 20, bottom: 120, left: 60 }
+
+function OpportunityChart({data, yAxis, xAxis}) {
+  const location = useLocation();
+  const navigate = useNavigate();
+  const [margin, setMargin] = React.useState(defaultMargin);
   const [boundingRect, setBoundingRect] = React.useState({});
   const [loaded, setLoaded] = React.useState(false);
   const canvas = React.useRef(null);
+  const tooltipBoundingRect = React.useRef({});
+
+  const handleCanvasResize = () => {
+        if (canvas.current) {
+            const rect = {
+                height: canvas.current.clientHeight,
+                width: canvas.current.clientWidth
+            }
+            setBoundingRect(rect)
+            setLoaded(true)
+        }
+    };
+
   React.useEffect(() => {
-    let debouncedResize;
-    let tooltipBoundingRect;
-    debouncedResize = debounce(handleCanvasResize, 100)
+    const debouncedResize = debounce(handleCanvasResize, 100)
         window.addEventListener('resize', debouncedResize, false)
         debouncedResize()
-        tooltipBoundingRect = document
-            .getElementById('opportunity-tooltip')
-            .getBoundingClientRect()
 
-        // matomo tracking
-        let currentUrl = location.pathname
-        trackPageView(currentUrl, 'Compound Match - Opportunity Exploration')
-    
+        const tooltipEl = document.getElementById('opportunity-tooltip')
+        if (tooltipEl) {
+            tooltipBoundingRect.current = tooltipEl.getBoundingClientRect()
+        }
+
+        trackPageView(location.pathname, 'Compound Match - Opportunity Exploration')
+
     return () => {
       window.removeEventListener('resize', debouncedResize, false)
     };
   }, []);
+
   React.useEffect(() => {
     if (loaded) {
             createChart()
             updateLeftMargin()
         }
-  }, [location, data, yAxis, xAxis, loaded]);
-
-  function shouldComponentUpdate(nextProps, nextState) {
-        const nextRect = nextState.boundingRect
-        const didSvgSizeChange =
-            boundingRect.width !== nextRect.width ||
-            boundingRect.height !== nextRect.height
-        const didDataChange = data !== nextProps.data
-        const didLeftMarginChange =
-            margin.left !== nextState.margin.left
-
-        return didSvgSizeChange || didDataChange || didLeftMarginChange
-    }
-
-  const handleCanvasResize = () => {
-        const boundingRect = {
-            height: canvas.current.clientHeight,
-            width: canvas.current.clientWidth
-        }
-        this.setState({ boundingRect, loaded: true })
-    };
+  }, [loaded, data, yAxis, xAxis]);
 
   const cleanOldSvg = () => {
         select('.opportunity-canvas')
@@ -79,20 +75,76 @@ function OpportunityChart({location, data, yAxis, xAxis}) {
                 maxLabelWidth = yAxisLabelDimensions.width
             }
         })
-        setMargin({ ...margin, left: maxLabelWidth + 35 })
+        setMargin(prev => ({ ...prev, left: maxLabelWidth + 35 }))
     };
 
-  function yAxisFullDomain() {
+  const yAxisFullDomain = () => {
         return opportunityChartAccessorConfig[yAxis].order
             ? opportunityChartAccessorConfig[yAxis].order
             : data.map(datum => datum.yAxis)
     }
 
-  function xAxisFullDomain() {
+  const xAxisFullDomain = () => {
         return opportunityChartAccessorConfig[xAxis].order
             ? opportunityChartAccessorConfig[xAxis].order
             : data.map(datum => datum.xAxis)
     }
+
+  const handleMouseOver = (event, d) => {
+        const currentSelection = select(event.currentTarget)
+
+        currentSelection
+            .transition()
+            .duration(200)
+            .attr('stroke', '#ea3796')
+            .attr('fill', '#ea3796')
+            .attr('r', '5px')
+
+        const cx = parseInt(currentSelection.attr('cx'))
+        const cy = parseInt(currentSelection.attr('cy'))
+        const intendedLocation = [cx + 7, cy + 7]
+        const shift = [0, 0]
+        const tbr = tooltipBoundingRect.current
+
+        if (intendedLocation[0] + tbr.height > boundingRect.width) {
+            shift[0] = intendedLocation[0] + tbr.width + 5 - boundingRect.width
+        }
+
+        if (intendedLocation[1] + tbr.height > boundingRect.height) {
+            shift[1] = intendedLocation[1] + tbr.height + 5 - boundingRect.height
+        }
+
+        select('#opportunity-tooltip-img').attr(
+            'src',
+            partIsometricImage(d.compoundNumberClean)
+        )
+        select('#opportunity-tooltip-compoundNumber').text(d.compoundNumber)
+        select('#opportunity-tooltip').attr(
+            'style',
+            `left: ${intendedLocation[0] - shift[0]}px;
+            top: ${intendedLocation[1] - shift[1]}px;
+            opacity: 1`
+        )
+    };
+
+  const handleMouseOut = (event) => {
+        select(event.currentTarget)
+            .transition()
+            .duration(200)
+            .attr('stroke', '#000')
+            .attr('fill', '#000')
+            .attr('r', '3px')
+
+        const currentTooltipStyleString = select('#opportunity-tooltip').attr('style')
+        select('#opportunity-tooltip').attr(
+            'style',
+            currentTooltipStyleString.replace('opacity: 1', 'opacity: 0')
+        )
+    };
+
+  const handleClick = (event, d) => {
+        navigate(`/compound/${d.compoundNumber}`)
+    };
 
   const createChart = () => {
         cleanOldSvg()
@@ -110,8 +162,8 @@ function OpportunityChart({location, data, yAxis, xAxis}) {
         ]
         const yScale = opportunityChartAccessorConfig[
             yAxis
-        ].getScale(yAxisFullDomain, yAxisRange)
-        const yAxis = axisLeft(yScale).ticks(10)
+        ].getScale(yAxisFullDomain(), yAxisRange)
+        const yAxisD3 = axisLeft(yScale).ticks(10)
 
         const xAxisRange = [
             margin.left,
@@ -119,8 +171,8 @@ function OpportunityChart({location, data, yAxis, xAxis}) {
         ]
         const xScale = opportunityChartAccessorConfig[
             xAxis
-        ].getScale(xAxisFullDomain, xAxisRange)
-        const xAxis = axisBottom(xScale).ticks(10)
+        ].getScale(xAxisFullDomain(), xAxisRange)
+        const xAxisD3 = axisBottom(xScale).ticks(10)
 
         const chart = svg.append('g')
         const graph = chart.append('g')
@@ -149,7 +201,7 @@ function OpportunityChart({location, data, yAxis, xAxis}) {
             .attr('id', 'opportunity-x-axis-group')
 
         xAxisGroup
-            .call(xAxis)
+            .call(xAxisD3)
             .selectAll('text')
             .style('text-anchor', 'end')
             .attr('dx', '-.8em')
@@ -161,76 +213,8 @@ function OpportunityChart({location, data, yAxis, xAxis}) {
             .attr('transform', `translate(${margin.left}, 0)`)
             .attr('class', 'pointer-events-none')
             .attr('id', 'opportunity-y-axis-group')
-        yAxisGroup.call(yAxis)
+        yAxisGroup.call(yAxisD3)
     };
-
-  const handleMouseOver = (d, i, m) => {
-        const currentSelection = select(m[i])
-
-        currentSelection
-            .transition()
-            .duration(200)
-            .attr('stroke', '#ea3796')
-            .attr('fill', '#ea3796')
-            .attr('r', '5px')
-
-        const intendedLocation = [
-            parseInt(currentSelection.attr('cx')) + 7,
-            parseInt(currentSelection.attr('cy')) + 7
-        ]
-        const shift = [0, 0]
-
-        if (
-            intendedLocation[0] + tooltipBoundingRect.height >
-            boundingRect.width
-        ) {
-            shift[0] =
-                intendedLocation[0] +
-                tooltipBoundingRect.width +
-                5 -
-                boundingRect.width
-        }
-
-        if (
-            intendedLocation[1] + tooltipBoundingRect.height >
-            boundingRect.height
-        ) {
-            shift[1] =
-                intendedLocation[1] +
-                tooltipBoundingRect.height +
-                5 -
-                boundingRect.height
-        }
-
-        select('#opportunity-tooltip-img').attr(
-            'src',
-            partIsometricImage(d.compoundNumberClean)
-        )
-        select('#opportunity-tooltip-compoundNumber').text(d.compoundNumber)
-        select('#opportunity-tooltip').attr(
-            'style',
-            `left: ${intendedLocation[0] - shift[0]}px; 
-            top: ${intendedLocation[1] - shift[1]}px;
-            opacity: 1`
-        )
-    };
-
-  function handleMouseOut() {
-        select(this)
-            .transition()
-            .duration(200)
-            .attr('stroke', '#000')
-            .attr('fill', '#000')
-            .attr('r', '3px')
-
-        const currentTooltipStyleString = select('#opportunity-tooltip').attr(
-            'style'
-        )
-        select('#opportunity-tooltip').attr(
-            'style',
-            currentTooltipStyleString.replace('opacity: 1', 'opacity: 0')
-        )
-    }
 
   return (
             <div className="opportunity-canvas" ref={canvas}>
@@ -256,4 +240,4 @@ function OpportunityChart({location, data, yAxis, xAxis}) {
         );
 }
 
-export default withRouter(OpportunityChart)
+export default OpportunityChart

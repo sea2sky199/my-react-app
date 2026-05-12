@@ -1,5 +1,5 @@
-import React, { Component } from 'react'
-import { withRouter } from 'react-router-dom'
+import React from 'react'
+import { useLocation } from 'react-router-dom'
 import './data-visualizations.css'
 
 import {
@@ -16,46 +16,46 @@ import { interpolateInferno } from 'd3-scale-chromatic'
 
 import { debounce } from 'lodash'
 
-function DistributionChart({location, data}) {
+function DistributionChart({data}) {
+  const location = useLocation();
   const [boundingRect, setBoundingRect] = React.useState({});
   const [loaded, setLoaded] = React.useState(false);
   const [windowHeight, setWindowHeight] = React.useState(null);
   const canvas = React.useRef(null);
+
+  const handleCanvasResize = () => {
+        if (canvas.current) {
+            const rect = {
+                height: canvas.current.clientHeight,
+                width: canvas.current.clientWidth
+            }
+            setBoundingRect(rect)
+            setLoaded(true)
+            setWindowHeight(window.innerHeight)
+        }
+    };
+
   React.useEffect(() => {
-    let debouncedResize;
-    debouncedResize = debounce(handleCanvasResize, 100)
+    const debouncedResize = debounce(handleCanvasResize, 100)
         window.addEventListener('resize', debouncedResize, false)
         debouncedResize()
+        trackPageView(location.pathname, 'Compound Match - Distribution')
 
-        // matomo tracking
-        let currentUrl = location.pathname
-        trackPageView(currentUrl, 'Compound Match - Distribution')
-    
     return () => {
       window.removeEventListener('resize', debouncedResize, false)
     };
   }, []);
+
   React.useEffect(() => {
     if (loaded) {
             createChart()
         }
-  }, [location, data, loaded]);
+  }, [loaded, data]);
 
-  function shouldComponentUpdate(nextProps, nextState) {
-        const nextRect = nextState.boundingRect
-        const didSvgSizeChange =
-            boundingRect.width !== nextRect.width ||
-            boundingRect.height !== nextRect.height
-
-        return didSvgSizeChange
-    }
-
-  const handleCanvasResize = () => {
-        const boundingRect = {
-            height: canvas.current.clientHeight,
-            width: canvas.current.clientWidth
-        }
-        this.setState({ boundingRect, loaded: true, windowHeight: window.innerHeight })
+  const formatChartTitle = (columnHeader) => {
+        return formatStringContainingMeasurement
+            ? formatStringContainingMeasurement(camelToHumanCase(columnHeader))
+            : camelToHumanCase(columnHeader)
     };
 
   const cleanOldSvg = () => {
@@ -140,7 +140,7 @@ function DistributionChart({location, data}) {
 
   const appendHistogram = (
         svgObject,
-        data,
+        histData,
         xScale,
         yScale,
         yScaleMin,
@@ -157,7 +157,7 @@ function DistributionChart({location, data}) {
 
         histogram
             .selectAll('rect')
-            .data(data.frequency)
+            .data(histData.frequency)
             .enter()
             .append('rect')
             .attr('transform', (d, i) => {
@@ -197,13 +197,13 @@ function DistributionChart({location, data}) {
 
   const appendBoxAndWhiskers = (
         svgObject,
-        data,
+        histData,
         xScale,
         yScale,
         frequencyMax,
         singleChartHeight
     ) => {
-        const xScaleBox = getLinearScale(data.log_range, [
+        const xScaleBox = getLinearScale(histData.log_range, [
             xScale(0),
             xScale(99) + xScale.bandwidth()
         ])
@@ -216,9 +216,9 @@ function DistributionChart({location, data}) {
             .append('rect')
             .attr(
                 'width',
-                xScaleBox(data.quartiles[2]) - xScaleBox(data.quartiles[0])
+                xScaleBox(histData.quartiles[2]) - xScaleBox(histData.quartiles[0])
             )
-            .attr('x', xScaleBox(data.quartiles[0]))
+            .attr('x', xScaleBox(histData.quartiles[0]))
             .attr('y', -yScale(frequencyMax / 4))
             .attr('height', yScale(frequencyMax / 2))
             .style('fill', 'none')
@@ -227,26 +227,74 @@ function DistributionChart({location, data}) {
 
         appendLine(
             boxAndWhiskers,
-            xScaleBox(data.log_range[0]),
+            xScaleBox(histData.log_range[0]),
             0,
-            xScaleBox(data.quartiles[0]),
+            xScaleBox(histData.quartiles[0]),
             0
         )
 
         appendLine(
             boxAndWhiskers,
-            xScaleBox(data.quartiles[2]),
+            xScaleBox(histData.quartiles[2]),
             0,
-            xScaleBox(data.log_range[1]),
+            xScaleBox(histData.log_range[1]),
             0
         )
 
         appendLine(
             boxAndWhiskers,
-            xScaleBox(data.quartiles[1]),
+            xScaleBox(histData.quartiles[1]),
             -yScale(frequencyMax / 4),
-            xScaleBox(data.quartiles[1]),
+            xScaleBox(histData.quartiles[1]),
             yScale(frequencyMax / 4)
+        )
+    };
+
+  const createHistogramChart = (
+        svg,
+        columnHeader,
+        histData,
+        partProfile,
+        singleChartHeight,
+        xScale,
+        fillColor,
+        margin,
+        index
+    ) => {
+        const frequencyMax = Math.max(...histData.frequency)
+        const chartYMargin = 10
+        const yScaleMin = 1
+
+        const yScale = getLinearScale(
+            [0, frequencyMax],
+            [yScaleMin, singleChartHeight - 2 * chartYMargin]
+        )
+
+        const accessorChart = svg
+            .append('g')
+            .attr('transform', `translate(0,${index * singleChartHeight})`)
+
+        appendYAxis(accessorChart, columnHeader, singleChartHeight, margin)
+
+        appendHistogram(
+            accessorChart,
+            histData,
+            xScale,
+            yScale,
+            yScaleMin,
+            frequencyMax,
+            Math.min(partProfile.left_bin, 99),
+            chartYMargin,
+            fillColor
+        )
+
+        appendBoxAndWhiskers(
+            accessorChart,
+            histData,
+            xScale,
+            yScale,
+            frequencyMax,
+            singleChartHeight
         )
     };
 
@@ -290,55 +338,7 @@ function DistributionChart({location, data}) {
         })
     };
 
-  const createHistogramChart = (
-        svg,
-        columnHeader,
-        data,
-        partProfile,
-        singleChartHeight,
-        xScale,
-        fillColor,
-        margin,
-        index
-    ) => {
-        const frequencyMax = Math.max(...data.frequency)
-        const chartYMargin = 10
-        const yScaleMin = 1
-
-        const yScale = getLinearScale(
-            [0, frequencyMax],
-            [yScaleMin, singleChartHeight - 2 * chartYMargin]
-        )
-
-        const accessorChart = svg
-            .append('g')
-            .attr('transform', `translate(0,${index * singleChartHeight})`)
-
-        appendYAxis(accessorChart, columnHeader, singleChartHeight, margin)
-
-        appendHistogram(
-            accessorChart,
-            data,
-            xScale,
-            yScale,
-            yScaleMin,
-            frequencyMax,
-            Math.min(partProfile.left_bin, 99),
-            chartYMargin,
-            fillColor
-        )
-
-        appendBoxAndWhiskers(
-            accessorChart,
-            data,
-            xScale,
-            yScale,
-            frequencyMax,
-            singleChartHeight
-        )
-    };
-
   return <div className="canvas-scrollable" ref={canvas}></div>;
 }
 
-export default withRouter(DistributionChart)
+export default DistributionChart

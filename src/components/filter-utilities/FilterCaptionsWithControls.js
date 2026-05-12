@@ -1,5 +1,5 @@
 import React from 'react'
-import { withRouter } from 'react-router-dom'
+import { useNavigate, useLocation } from 'react-router-dom'
 
 import { FilterCaption, ClickableDiv } from '..'
 import {
@@ -17,9 +17,10 @@ const FilterCaptionsWithControls = ({
     rangeMap,
     updateFilterRange,
     searchMap,
-    updateSearch,
-    history
+    updateSearch
 }) => {
+    const navigate = useNavigate();
+    const location = useLocation();
     const roundRangeToHundreths = range => {
         //range in format [min, max]
         return range.map((val, i) => {
@@ -34,8 +35,8 @@ const FilterCaptionsWithControls = ({
     }
 
     const clearAllFilters = () => {
-        history.push(`${history.location.pathname}`, {
-            ...history.location.state
+        navigate(location.pathname, {
+            state: { ...location.state }
         })
     }
 
@@ -120,4 +121,4 @@ const FilterCaptionsWithControls = ({
     )
 }
 
-export default withRouter(FilterCaptionsWithControls)
+export default FilterCaptionsWithControls

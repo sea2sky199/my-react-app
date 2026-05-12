@@ -1,8 +1,7 @@
 import React from 'react'
-import { withRouter } from 'react-router-dom'
-import { observer, inject } from 'mobx-react'
+import { useNavigate, useLocation } from 'react-router-dom'
 
-import { Cell, compoundNumberCell } from '..'
+import { Cell, CompoundNumberCell } from '..'
 import {
     toTitleCase,
     roundToNthDecimal,
@@ -16,32 +15,38 @@ import {
 const CompoundRow = ({
     compoundInfo,
     headings,
-    history,
     isSimilarityView,
     selectedCompoundStore
 }) => {
+    const navigate = useNavigate();
+    const location = useLocation();
+
     const navigateToCompound = compoundNumber => {
         if (!isSimilarityView) {
-            history.push(`/compound/${compoundNumber}`, {
-                returnToAllCompoundsViewURL: `${history.location.pathname}${history.location.search}`,
-                isGridView: false
+            navigate(`/compound/${compoundNumber}`, {
+                state: {
+                    returnToAllCompoundsViewURL: `${location.pathname}${location.search}`,
+                    isGridView: false
+                }
             })
         } else {
-            const firstLevelcompoundNumber = history.location.pathname
+            const firstLevelcompoundNumber = location.pathname
                 .slice(1)
                 .split('/')[1]
 
-            history.push(`/compound/${compoundNumber}`, {
-                ...history.location.state,
-                firstLevelcompoundNumber: firstLevelcompoundNumber,
-                returnToSimilarCompoundsViewURL: `${history.location.pathname}${history.location.search}`,
-                isGridView: false
+            navigate(`/compound/${compoundNumber}`, {
+                state: {
+                    ...location.state,
+                    firstLevelcompoundNumber: firstLevelcompoundNumber,
+                    returnToSimilarCompoundsViewURL: `${location.pathname}${location.search}`,
+                    isGridView: false
+                }
             })
         }
     }
 
     const partRowClickActions = compoundInfo => {
-        if (selectedCompoundStore.isMultiSelectView) {
+        if (selectedCompoundStore && selectedCompoundStore.isMultiSelectView) {
             return {
                 onClick: () =>
                     selectedCompoundStore.updateSelectedcompoundNumbers(
@@ -63,7 +68,7 @@ const CompoundRow = ({
         <tr
             className={`h5 pointer ${hasClass(
                 ['pointer', true],
-                ['multi-select-row', selectedCompoundStore.isMultiSelectView]
+                ['multi-select-row', selectedCompoundStore && selectedCompoundStore.isMultiSelectView]
             )}`}
             {...partRowClickActions(compoundInfo)}
         >
@@ -84,7 +89,7 @@ const CompoundRow = ({
                     </div>
                 )
                 if (heading === 'compoundNumber') {
-                    content = <compoundNumberCell compoundInfo={compoundInfo} />
+                    content = <CompoundNumberCell compoundInfo={compoundInfo} />
                 }
                 return (
                     <Cell
@@ -92,7 +97,7 @@ const CompoundRow = ({
                         cellIndex={cellIndex}
                     >
                         <div style={{ position: 'relative' }}>
-                            {selectedCompoundStore.isMultiSelectView &&
+                            {selectedCompoundStore && selectedCompoundStore.isMultiSelectView &&
                                 cellIndex === 0 && (
                                     <div
                                         className="flex align-center"
@@ -122,4 +127,4 @@ const CompoundRow = ({
     )
 }
 
-export default withRouter(inject('selectedCompoundStore')(observer(CompoundRow)))
+export default CompoundRow

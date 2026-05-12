@@ -1,6 +1,5 @@
-import React, { Component } from 'react'
-import { inject, observer } from 'mobx-react'
-import { withRouter } from 'react-router-dom'
+import React from 'react'
+import { useNavigate, useLocation } from 'react-router-dom'
 import './help-center.css'
 
 import { ClickableDiv } from '..'
@@ -22,33 +21,11 @@ import {
     trackPageView
 } from '../../utilities'
 
-function HelpCenter({history, compoundsStore, userInfoStore}) {
-  const [currentHelpPage, setCurrentHelpPage] = React.useState(this.helpCenterPages[0]);
-  const [currentHelpPageObj, setCurrentHelpPageObj] = React.useState(null);
-  React.useEffect(() => {
-    setCurrentPage()
-  }, []);
-  React.useEffect(() => {
-    setCurrentPage()
-  }, [history, compoundsStore, userInfoStore]);
+function HelpCenter({compoundsStore, userInfoStore}) {
+  const navigate = useNavigate();
+  const location = useLocation();
 
-  const getCurrentPage = () => {
-        const currentQueryString = history.location.search
-        return helpCenterPages.find(
-            page => `?title=${page.route}` === currentQueryString
-        )
-    };
-
-  const setCurrentPage = () => {
-        const currentPage = getCurrentPage()
-        if (!currentPage) {
-            routeToPage(helpCenterPages[0].route)
-        } else if (currentPage !== currentHelpPage) {
-            setCurrentHelpPage(currentPage)
-        }
-    };
-
-  helpCenterPages = [
+  const helpCenterPages = [
         {
             heading: 'OUR VISION',
             helpPageObj: ourVision,
@@ -110,6 +87,36 @@ function HelpCenter({history, compoundsStore, userInfoStore}) {
         }
     ]
 
+  const [currentHelpPage, setCurrentHelpPage] = React.useState(helpCenterPages[0]);
+
+  const routeToPage = (route) => {
+        navigate(`/help?title=${route}`)
+    };
+
+  const getCurrentPage = () => {
+        const currentQueryString = location.search
+        return helpCenterPages.find(
+            page => `?title=${page.route}` === currentQueryString
+        )
+    };
+
+  const setCurrentPage = () => {
+        const currentPage = getCurrentPage()
+        if (!currentPage) {
+            routeToPage(helpCenterPages[0].route)
+        } else if (currentPage !== currentHelpPage) {
+            setCurrentHelpPage(currentPage)
+        }
+    };
+
+  React.useEffect(() => {
+    setCurrentPage()
+  }, []);
+
+  React.useEffect(() => {
+    setCurrentPage()
+  }, [location.search]);
+
   const renderHelpCenterList = () => {
         return helpCenterPages.map(page => {
             const classNames = ['help-center-list-item']
@@ -126,13 +133,6 @@ function HelpCenter({history, compoundsStore, userInfoStore}) {
                 </ClickableDiv>
             )
         })
-    };
-
-  const renderHelpPage = () => {
-        const currentPage = helpCenterPages.find(
-            page => page.heading === currentHelpPageObj
-        )
-        return currentPage.component || 'PAGE NOT FOUND'
     };
 
   return (
@@ -174,6 +174,5 @@ function HelpCenter({history, compoundsStore, userInfoStore}) {
             </div>
         );
 }
-export default withRouter(
-    inject('compoundsStore', 'userInfoStore')(observer(HelpCenter))
-)
+
+export default HelpCenter

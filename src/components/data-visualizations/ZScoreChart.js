@@ -1,5 +1,5 @@
-import React, { Component } from 'react'
-import { withRouter } from 'react-router-dom'
+import React from 'react'
+import { useLocation } from 'react-router-dom'
 import './data-visualizations.css'
 
 import { select } from 'd3-selection'
@@ -15,47 +15,47 @@ import {
 
 import { debounce } from 'lodash'
 
-function ZScoreChart({location, data}) {
-  const [margin, setMargin] = React.useState(this.defaultMargin);
+const defaultMargin = { top: 20, right: 20, bottom: 120, left: 60 }
+
+function ZScoreChart({data}) {
+  const location = useLocation();
+  const [margin, setMargin] = React.useState(defaultMargin);
   const [boundingRect, setBoundingRect] = React.useState({});
   const [loaded, setLoaded] = React.useState(false);
   const canvas = React.useRef(null);
+
+  const handleCanvasResize = () => {
+        if (canvas.current) {
+            const rect = {
+                height: canvas.current.clientHeight,
+                width: canvas.current.clientWidth
+            }
+            setBoundingRect(rect)
+            setLoaded(true)
+        }
+    };
+
   React.useEffect(() => {
-    let debouncedResize;
-    debouncedResize = debounce(handleCanvasResize, 100)
+    const debouncedResize = debounce(handleCanvasResize, 100)
         window.addEventListener('resize', debouncedResize, false)
         debouncedResize()
+        trackPageView(location.pathname, 'Compound Match - Unique Features')
 
-        // matomo tracking
-        let currentUrl = location.pathname
-        trackPageView(currentUrl, 'Compound Match - Unique Features')
-    
     return () => {
       window.removeEventListener('resize', debouncedResize, false)
     };
   }, []);
+
   React.useEffect(() => {
     if (loaded) {
             createChart()
         }
-  }, [location, data, loaded]);
+  }, [loaded, data]);
 
-  function shouldComponentUpdate(nextProps, nextState) {
-        const nextRect = nextState.boundingRect
-        const didSvgSizeChange =
-            boundingRect.width !== nextRect.width ||
-            boundingRect.height !== nextRect.height
-        const didDataChange = data !== nextProps.data
-
-        return didSvgSizeChange || didDataChange
-    }
-
-  const handleCanvasResize = () => {
-        const boundingRect = {
-            height: canvas.current.clientHeight,
-            width: canvas.current.clientWidth
-        }
-        this.setState({ boundingRect, loaded: true })
+  const formatAccessorLabel = (d) => {
+        return formatStringContainingMeasurement
+            ? formatStringContainingMeasurement(camelToHumanCase(d))
+            : camelToHumanCase(d)
     };
 
   const cleanOldSvg = () => {
@@ -170,7 +170,6 @@ function ZScoreChart({location, data}) {
                     Z-Score
                     <Information
                         header="Z-Score Definition"
-                        eventName="showZScoreDefinition"
                     >
                         <div className="h6 z-score-description-container">
                             Z Score is a measurement of how unique a particular
@@ -189,4 +188,4 @@ function ZScoreChart({location, data}) {
         );
 }
 
-export default withRouter(ZScoreChart)
+export default ZScoreChart

@@ -1,4 +1,4 @@
-import React, { Component } from 'react'
+import React from 'react'
 import ReactDOM from 'react-dom'
 
 import { ClickableDiv } from '..'
@@ -7,21 +7,27 @@ const modalRoot = document.getElementById('modal-root')
 
 function InformationModalShell({popOut, initialPosition, hideInformative, header, children}) {
   const [shift, setShift] = React.useState({
-                left: this.popOut ? this.initialPosition.left : 0,
-                top: this.popOut ? this.initialPosition.top : 0
-            });
+        left: popOut ? initialPosition.left : 0,
+        top: popOut ? initialPosition.top : 0
+    });
   const informativeModal = React.useRef(null);
+
+  const handleClick = React.useCallback((e) => {
+        if (informativeModal.current && !informativeModal.current.contains(e.target)) {
+            hideInformative()
+        }
+    }, [hideInformative]);
+
   React.useEffect(() => {
     document.addEventListener('mousedown', handleClick, false)
-        addShiftAsNeeded()
-    
     return () => {
       document.removeEventListener('mousedown', handleClick, false)
     };
-  }, []);
+  }, [handleClick]);
+
   React.useEffect(() => {
     addShiftAsNeeded()
-  }, [popOut, initialPosition, hideInformative, header, children]);
+  }, [popOut, initialPosition]);
 
   const addShiftAsNeeded = () => {
         const update = { ...shift }
@@ -50,7 +56,7 @@ function InformationModalShell({popOut, initialPosition, hideInformative, header
                 informativeModalRect.left + (leftUpdate ? 0 : leftShift)
 
             if (distanceFromRight < 0 && distanceFromLeft < 0) {
-                return
+                return leftUpdate
             } else if (distanceFromRight < 0) {
                 let update = leftShift + distanceFromRight - 10
                 if (Math.abs(update) < distanceFromLeft) {
@@ -75,7 +81,7 @@ function InformationModalShell({popOut, initialPosition, hideInformative, header
             const distanceFromTop = informativeModalRect.top
 
             if (distanceFromBottom < 0 && distanceFromTop < 0) {
-                return
+                return topUpdate
             } else if (distanceFromBottom < 0) {
                 let update = topUpdate + distanceFromBottom - 20
                 if (Math.abs(update) < distanceFromTop) {
@@ -88,7 +94,7 @@ function InformationModalShell({popOut, initialPosition, hideInformative, header
         return topUpdate
     };
 
-  function top() {
+  const top = () => {
         return popOut
             ? `${shift.top}px`
             : `calc( 100% + 4px + ${shift.top}px )`
@@ -99,10 +105,9 @@ function InformationModalShell({popOut, initialPosition, hideInformative, header
             <div
                 className="information-modal-container"
                 onClick={e => e.stopPropagation()}
-                onAnimationEnd={completeEvent}
                 ref={informativeModal}
                 style={{
-                    top: top,
+                    top: top(),
                     left: `${shift.left}px`
                 }}
             >

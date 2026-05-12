@@ -1,4 +1,4 @@
-import React, { Component } from 'react'
+import React from 'react'
 import { RangeFilter, ClickableDiv } from '..'
 
 import './slider.css'
@@ -11,56 +11,64 @@ import {
 
 function RangeFilterCell({activeRange, classNames, grouping, firstCell, range, updateRangeMethod}) {
   const [open, setOpen] = React.useState(false);
-  const [minRange, setMinRange] = React.useState(null);
-  const [maxRange, setMaxRange] = React.useState(null);
+  const dropdownContainer = React.useRef(null);
+
+  const handleClick = React.useCallback((e) => {
+    if (dropdownContainer.current && !dropdownContainer.current.contains(e.target)) {
+      setOpen(false)
+    }
+  }, []);
+
   React.useEffect(() => {
     document.addEventListener('mousedown', handleClick, false)
-    
     return () => {
       document.removeEventListener('mousedown', handleClick, false)
     };
-  }, []);
-  React.useEffect(() => {
-    if (activeRange && !activeRange) {
-            let activeRange = [minRange, maxRange]
-            activeRange = roundRangeToHundreths(activeRange)
-            this.setState({
-                minInput: activeRange[0],
-                maxInput: activeRange[1]
-            })
+  }, [handleClick]);
+
+  const roundRangeToHundreths = (rangeArr) => {
+        return rangeArr.map((val, i) => {
+            if (i === 0) {
+                return Math.floor(val * 100) / 100
+            } else {
+                return Math.ceil(val * 100) / 100
+            }
+        })
+    };
+
+  const formatHeading = (heading) => {
+        return formatStringContainingMeasurement
+            ? formatStringContainingMeasurement(camelToHumanCase(heading))
+            : camelToHumanCase(heading)
+    };
+
+  const getHeading = (g) => {
+        if (g === 'similarityRank') {
+            g = 'sim.Rank'
         }
-  }, [activeRange, classNames, grouping, firstCell, range, updateRangeMethod, minRange, maxRange]);
+        return formatHeading(g)
+    };
 
-  const classNames = [...classNames, 'Cell']
+  const cellClassNames = [...(classNames || []), 'Cell']
 
-        const activeRange = activeRange || []
-        const roundedRange = activeRange.length
-            ? roundRangeToHundreths(activeRange)
-            : roundRangeToHundreths([
-                  minRange,
-                  maxRange
-              ])
+        const currentActiveRange = activeRange || []
+        const roundedRange = currentActiveRange.length
+            ? roundRangeToHundreths(currentActiveRange)
+            : null
 
         const dropdownClassNames = [
             'filter-dropdown-button',
             'flex',
             'space-between'
         ]
-        if (activeRange.length) {
+        if (currentActiveRange.length) {
             dropdownClassNames.push(`active-filter-button`)
-        }
-
-        const getHeading = grouping => {
-            if (grouping === 'similarityRank') {
-                grouping = 'sim.Rank'
-            }
-            return formatHeading(grouping)
         }
 
         return (
             <td
-                className={classNames.join(' ')}
-                ref={node => (dropdownContainer = node)}
+                className={cellClassNames.join(' ')}
+                ref={dropdownContainer}
             >
                 <div style={{ position: 'relative' }}>
                     <ClickableDiv
@@ -70,7 +78,7 @@ function RangeFilterCell({activeRange, classNames, grouping, firstCell, range, u
                             setOpen(!open)
                         }
                     >
-                        {activeRange.length
+                        {currentActiveRange.length
                             ? roundedRange.join(', ')
                             : getHeading(grouping)}
                         <div
@@ -94,7 +102,7 @@ function RangeFilterCell({activeRange, classNames, grouping, firstCell, range, u
                             <RangeFilter
                                 grouping={grouping}
                                 range={range}
-                                activeRange={activeRange}
+                                activeRange={currentActiveRange}
                                 updateRangeMethod={updateRangeMethod}
                             />
                         </div>

@@ -1,9 +1,8 @@
-import React, { Component } from 'react'
+import React from 'react'
 
 import { Icon } from 'react-icons-kit'
 import { ic_file_download } from 'react-icons-kit/md/ic_file_download'
 import { CSVLink } from 'react-csv'
-import moment from 'moment'
 import { getChemDWProprietary } from '../../utilities'
 import { Tooltip, Spinner } from '../../components'
 
@@ -12,24 +11,20 @@ function CSVExport({dataRequest, totalDataLength, exportLimit, headers, classNam
   const [loaded, setLoaded] = React.useState(false);
   const [data, setData] = React.useState([]);
   const csvLink = React.useRef(null);
-  React.useEffect(() => {
-    if (prevProps !== props) {
-            setLoading({ loaded: false, loading: false })
-        }
-  }, [dataRequest, totalDataLength, exportLimit, headers, classNamesArray, exportType, loading, loaded]);
 
-  const onClick = () => {
+  React.useEffect(() => {
+        setLoading(false)
+        setLoaded(false)
+  }, [dataRequest, totalDataLength, exportLimit, headers, classNamesArray, exportType]);
+
+  const onClick = async () => {
         setLoading(true)
         const res = await dataRequest(1, totalDataLength)
-        if (loading) {
-            this.setState({
-                data: res.results,
-                loading: false,
-                loaded: true
-            })
-            if (csvLink.current) {
-                csvLink.current.link.click()
-            }
+        setData(res.results)
+        setLoading(false)
+        setLoaded(true)
+        if (csvLink.current) {
+            csvLink.current.link.click()
         }
     };
 
@@ -72,9 +67,7 @@ function CSVExport({dataRequest, totalDataLength, exportLimit, headers, classNam
                 ref={csvLink}
                 className={classNamesArray.join(' ')}
                 style={{ textDecoration: 'none' }}
-                filename={`compoundMatch-${
-                    exportType
-                }${moment().format()}.csv`}
+                filename={`compoundMatch-${exportType}${new Date().toISOString()}.csv`}
                 data={[
                     {},
                     {

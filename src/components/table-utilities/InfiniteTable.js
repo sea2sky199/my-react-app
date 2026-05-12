@@ -1,4 +1,4 @@
-import React, { Component } from 'react'
+import React from 'react'
 import InfiniteScroll from 'react-infinite-scroller'
 
 import { Spinner } from '..'
@@ -7,24 +7,22 @@ function InfiniteTable({retrieveNewRows, view, getSearchAndFilterCriteria, compo
   const [loading, setLoading] = React.useState(false);
   const [networkError, setNetworkError] = React.useState(false);
 
-  const loadFunc = () => {
+  const loadFunc = async () => {
         if (!loading) {
-            // console.log('loading more rows')
             setLoading(true)
             try {
                 await retrieveNewRows(view.length + 1)
                 setLoading(false)
             } catch (err) {
                 console.log('Unable to load rows', err)
-                this.setState({ networkError: true, loading: false })
-                //TODO: Add a way to reload, and revoke networkError
+                setNetworkError(true)
+                setLoading(false)
             }
         }
     };
 
-  function errorMessage() {
+  const errorMessage = () => {
         const { searchMap } = getSearchAndFilterCriteria()
-        const compoundNumberSearchLimit = compoundNumberSearchLimit
         const iscompoundNumberSearchLimitExceeded =
             !!searchMap.compoundNumber &&
             searchMap.compoundNumber.split(' ').length > compoundNumberSearchLimit
@@ -36,7 +34,7 @@ function InfiniteTable({retrieveNewRows, view, getSearchAndFilterCriteria, compo
   return networkError ? (
             <tbody>
                 <tr>
-                    <td style={{ paddingLeft: '2rem' }}>{errorMessage}</td>
+                    <td style={{ paddingLeft: '2rem' }}>{errorMessage()}</td>
                 </tr>
             </tbody>
         ) : (

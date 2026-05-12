@@ -1,4 +1,4 @@
-import React, { Component } from 'react'
+import React from 'react'
 import { ClickableDiv } from '..'
 import './utilities.css'
 
@@ -6,20 +6,26 @@ import { Icon } from 'react-icons-kit'
 import { elevator } from 'react-icons-kit/iconic/elevator'
 
 function DropdownSelect({options, defaultOption, style, id, formatSelected, selectCallback, formatOption}) {
-  const [options, setOptions] = React.useState(this.options || []);
-  const [selected, setSelected] = React.useState(this.defaultOption);
+  const [selected, setSelected] = React.useState(defaultOption);
   const [open, setOpen] = React.useState(false);
+  const dropdownRef = React.useRef(null);
+
+  const handleClick = React.useCallback((e) => {
+    if (dropdownRef.current && !dropdownRef.current.contains(e.target)) {
+      setOpen(false)
+    }
+  }, []);
+
   React.useEffect(() => {
     document.addEventListener('mousedown', handleClick, false)
-    
     return () => {
       document.removeEventListener('mousedown', handleClick, false)
     };
-  }, []);
+  }, [handleClick]);
 
   return (
             <div
-                ref={node => (dropdownContainer = node)}
+                ref={dropdownRef}
                 style={{
                     position: 'relative',
                     ...style
@@ -69,10 +75,8 @@ function DropdownSelect({options, defaultOption, style, id, formatSelected, sele
                                     key={option}
                                     clickAction={() => {
                                         selectCallback(option)
-                                        setSelected({
-                                            selected: option,
-                                            open: false
-                                        })
+                                        setSelected(option)
+                                        setOpen(false)
                                     }}
                                 >
                                     {formatOption

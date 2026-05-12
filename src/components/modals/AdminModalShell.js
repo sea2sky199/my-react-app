@@ -1,4 +1,4 @@
-import React, { Component } from 'react'
+import React from 'react'
 import ReactDOM from 'react-dom'
 import './modal.css'
 
@@ -10,20 +10,23 @@ const modalRoot = document.getElementById('modal-root')
 function AdminModalShell({closeModal, backdropStyle, header, body, cancelText, isHoldOnSubmission, submitText, submitModal}) {
   const [showing, setShowing] = React.useState(false);
   const [hiding, setHiding] = React.useState(false);
-  const [closeEvent, setCloseEvent] = React.useState(null);
   React.useEffect(() => {
     setTimeout(() => {
             setShowing(true)
         }, 100)
   }, []);
 
+  const willCloseModal = () => {
+        setHiding(true)
+    };
+
   const completeEvent = () => {
         if (hiding) {
-            closeModal(closeEvent)
+            closeModal()
         }
     };
 
-  modalButtonArr = [
+  const modalButtonArr = [
         'modal-footer-button',
         'flex',
         'justify-center',

@@ -1,6 +1,4 @@
-import React, { Component, Fragment } from 'react'
-
-import { createEvent } from '../../utilities'
+import React, { Fragment } from 'react'
 
 import InformationModalShell from './InformationModalShell'
 import './information.css'
@@ -8,51 +6,24 @@ import './information.css'
 import { Icon } from 'react-icons-kit'
 import { ic_info } from 'react-icons-kit/md/ic_info'
 
-function Information({eventName, popOut, buttonStyle, header, children}) {
+function Information({popOut, buttonStyle, header, children}) {
   const [showing, setShowing] = React.useState(false);
-  const [informative, setInformative] = React.useState(this.modalShowEvent);
-  const [showInformativeEvent, setShowInformativeEvent] = React.useState(createEvent(this.eventName));
   const [informativeButtonPosition, setInformativeButtonPosition] = React.useState({});
   const informativeButton = React.useRef(null);
-  React.useEffect(() => {
-    modalShowEvent.addEventListener(
-            eventName,
-            showInformative
-        )
-        setInformativeButtonPosition()
-    
-    return () => {
-      modalShowEvent.removeEventListener(
-            eventName,
-            showInformative
-        )
-    };
-  }, []);
 
-  const setInformativeButtonPosition = () => {
-        const currentPosition = informativeButton.current.getBoundingClientRect()
-        if (
-            informativeButtonPosition.left !==
-                currentPosition.left ||
-            informativeButtonPosition.top !== currentPosition.top
-        )
-            setInformativeButtonPosition(currentPosition)
-    };
+  const isPopOut = popOut === undefined ? true : popOut
 
   const showInformative = () => {
-        this.setState({ showing: true }, () =>
-            setInformativeButtonPosition()
-        )
+        if (informativeButton.current) {
+            const currentPosition = informativeButton.current.getBoundingClientRect()
+            setInformativeButtonPosition(currentPosition)
+        }
+        setShowing(true)
     };
 
   const hideInformative = () => {
         setShowing(false)
     };
-
-  function popOut() {
-        //defaults popOut to true
-        return popOut === undefined ? true : popOut
-    }
 
   return (
             <Fragment>
@@ -62,8 +33,7 @@ function Information({eventName, popOut, buttonStyle, header, children}) {
                     ref={informativeButton}
                 >
                     <Icon
-                        id={`${eventName}-icon`}
-                        onClick={triggerShowInformative}
+                        onClick={showInformative}
                         icon={ic_info}
                         size={16}
                     />
@@ -71,12 +41,10 @@ function Information({eventName, popOut, buttonStyle, header, children}) {
                 {showing && (
                     <div style={{ position: 'relative', display: 'inline' }}>
                         <InformationModalShell
-                            initialPosition={
-                                informativeButtonPosition
-                            }
+                            initialPosition={informativeButtonPosition}
                             hideInformative={hideInformative}
                             header={header}
-                            popOut={popOut}
+                            popOut={isPopOut}
                         >
                             <div style={{ backgroundColor: '#fff' }}>
                                 {children}

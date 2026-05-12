@@ -1,6 +1,5 @@
-import React, { Component, Fragment } from 'react'
-import { withRouter } from 'react-router-dom'
-import { inject, observer } from 'mobx-react'
+import React, { Fragment } from 'react'
+import { useLocation } from 'react-router-dom'
 import './home.css'
 import { Information } from '..'
 import {
@@ -15,13 +14,14 @@ import logo from '../../images/compoundMatchLogo.svg'
 
 import RequestAccessSidebar from './RequestAccessSidebar'
 
-function RequestAccess({userInfoStore, compoundsStore, location}) {
-  const [name, setName] = React.useState(name);
-  const [summary, setSummary] = React.useState(summary);
+function RequestAccess({userInfoStore, compoundsStore}) {
+  const location = useLocation();
+  const [summary, setSummary] = React.useState(null);
+
+  const name = userInfoStore && userInfoStore.userInfo ? userInfoStore.userInfo.name : ''
+
   React.useEffect(() => {
-    // matomo tracking
-        let currentUrl = location.pathname
-        trackPageView(currentUrl, 'Compound Match - Request Access')
+        trackPageView(location.pathname, 'Compound Match - Request Access')
   }, []);
 
   const requestAccessLink = () => {
@@ -78,6 +78,4 @@ function RequestAccess({userInfoStore, compoundsStore, location}) {
         );
 }
 
-export default withRouter(
-    inject('userInfoStore', 'compoundsStore')(observer(RequestAccess))
-)
+export default RequestAccess

@@ -1,4 +1,4 @@
-import React, { Component } from 'react'
+import React from 'react'
 
 import { baseImageURL } from '../../utilities'
 
@@ -10,29 +10,65 @@ import './image-components.css'
 
 function ImageCarousel({imageError, compoundNumberClean}) {
   const [currentImageIndex, setCurrentImageIndex] = React.useState(0);
-  React.useEffect(() => {
-    let timerHandle;
-    timerHandle = setInterval(() => {
-            imageError()
-        }, 3000) //3 second timeout
-    
-    return () => {
-      stopTimeout()
-    };
-  }, []);
+  const timerHandle = React.useRef(null);
 
-  const stopTimeout = () => {
-        if (timerHandle) {
-            clearTimeout(timerHandle)
-        }
-    };
-
-  imagesURLs = [
+  const imagesURLs = [
         `${baseImageURL}${compoundNumberClean}_Isometric.jpg`,
         `${baseImageURL}${compoundNumberClean}_Front.jpg`,
         `${baseImageURL}${compoundNumberClean}_Left.jpg`,
         `${baseImageURL}${compoundNumberClean}_Top.jpg`
     ]
+
+  const stopTimeout = () => {
+        if (timerHandle.current) {
+            clearInterval(timerHandle.current)
+            timerHandle.current = null
+        }
+    };
+
+  React.useEffect(() => {
+    timerHandle.current = setInterval(() => {
+            imageError()
+        }, 3000)
+
+    return () => {
+      stopTimeout()
+    };
+  }, []);
+
+  const nextSlide = () => {
+        const lastIndex = imagesURLs.length - 1
+        const shouldResetIndex = currentImageIndex === lastIndex
+        const index = shouldResetIndex ? 0 : currentImageIndex + 1
+        setCurrentImageIndex(index)
+    };
+
+  const previousSlide = () => {
+        const firstIndex = 0
+        const shouldResetIndex = currentImageIndex === firstIndex
+        const index = shouldResetIndex
+            ? imagesURLs.length - 1
+            : currentImageIndex - 1
+        setCurrentImageIndex(index)
+    };
+
+  const routeToSlide = (index) => {
+        setCurrentImageIndex(index)
+    };
+
+  const renderImageSlide = (url) => {
+        return (
+            <div
+                className="carousel-image-container"
+                style={{
+                    backgroundImage: `url(${url})`,
+                    backgroundSize: 'contain',
+                    backgroundRepeat: 'no-repeat',
+                    backgroundPosition: 'center'
+                }}
+            />
+        )
+    };
 
   const renderArrow = (direction, clickFunction, glyph) => {
         return (
@@ -40,26 +76,6 @@ function ImageCarousel({imageError, compoundNumberClean}) {
                 {glyph}
             </div>
         )
-    };
-
-  const nextSlide = () => {
-        const lastIndex = imagesURLs.length - 1
-        const { currentImageIndex } = this.state
-        const shouldResetIndex = currentImageIndex === lastIndex
-        const index = shouldResetIndex ? 0 : currentImageIndex + 1
-
-        setCurrentImageIndex(index)
-    };
-
-  const previousSlide = () => {
-        const firstIndex = 0
-        const { currentImageIndex } = this.state
-        const shouldResetIndex = currentImageIndex === firstIndex
-        const index = shouldResetIndex
-            ? imagesURLs.length - 1
-            : currentImageIndex - 1
-
-        setCurrentImageIndex(index)
     };
 
   const renderCarouselRoutingButtons = () => {
@@ -103,9 +119,7 @@ function ImageCarousel({imageError, compoundNumberClean}) {
                         size={'70'}
                     />
                 )}
-                {renderImageSlide(
-                    imagesURLs[currentImageIndex]
-                )}
+                {renderImageSlide(imagesURLs[currentImageIndex])}
                 {renderArrow(
                     'right',
                     nextSlide,

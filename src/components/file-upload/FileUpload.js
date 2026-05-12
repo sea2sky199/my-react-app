@@ -1,4 +1,4 @@
-import React, { Component } from 'react'
+import React from 'react'
 import './file-upload.css'
 
 import Resumablejs from 'resumablejs'
@@ -12,22 +12,22 @@ function FileUpload({service, query, filetypes, maxFiles, maxFileSize, headerObj
   const [progressBar, setProgressBar] = React.useState(0);
   const [files, setFiles] = React.useState([]);
   const [isUploading, setIsUploading] = React.useState(false);
-  const prevFilesRef = React.useRef();
+  const resumable = React.useRef(null);
+  const uploaderRef = React.useRef(null);
+  const dropZoneRef = React.useRef(null);
+
+  const addFileLocally = (file) => {
+        setFiles(prev => [...prev, file])
+    };
+
   React.useEffect(() => {
-    const didFilesChange = prevFilesRef.current && prevFilesRef.current !== files
-
-        if (didFilesChange) {
-            if (updateFileNamesForUpload) {
-                updateFileNamesForUpload(
-                    files.map(file => file.fileName)
-                )
-            }
+        if (updateFileNamesForUpload) {
+            updateFileNamesForUpload(files.map(file => file.fileName))
         }
-    prevFilesRef.current = files;
-  }, [service, query, filetypes, maxFiles, maxFileSize, headerObject, withCredentials, chunkSize, simultaneousUploads, fileParameterName, generateUniqueIdentifier, forceChunkSize, promiseCallback, onUploadSuccessCallback, onUploadErrorCallback, updateFileNamesForUpload, uploaderID, showFileList, dropTargetID, files]);
+  }, [files]);
 
-  const componentDidMount = () => {
-        let ResumableField = new Resumablejs({
+  React.useEffect(() => {
+        const ResumableField = new Resumablejs({
             target: service,
             query: query || {},
             fileType: filetypes,
@@ -48,10 +48,10 @@ function FileUpload({service, query, filetypes, maxFiles, maxFileSize, headerObj
             forceChunkSize: forceChunkSize
         })
 
-        ResumableField.assignBrowse(uploader)
-        ResumableField.assignDrop(dropZone)
+        if (uploaderRef.current) ResumableField.assignBrowse(uploaderRef.current)
+        if (dropZoneRef.current) ResumableField.assignDrop(dropZoneRef.current)
 
-        ResumableField.on('fileAdded', (file, event) => {
+        ResumableField.on('fileAdded', (file) => {
             addFileLocally(file)
         })
 
@@ -60,7 +60,7 @@ function FileUpload({service, query, filetypes, maxFiles, maxFileSize, headerObj
                 onUploadSuccessCallback(file, fileServer)
                 resolve([file, fileServer])
             })
-    
+
             ResumableField.on('fileError', (file, errorCount) => {
                 onUploadErrorCallback(file, errorCount)
                 reject([file, errorCount])
@@ -79,12 +79,11 @@ function FileUpload({service, query, filetypes, maxFiles, maxFileSize, headerObj
             }
         })
 
-
-        resumable = ResumableField
-    };
+        resumable.current = ResumableField
+  }, []);
 
   const upload = () => {
-        resumable.upload()
+        resumable.current.upload()
     };
 
   const removeFileLocally = (event, file, index) => {
@@ -95,7 +94,7 @@ function FileUpload({service, query, filetypes, maxFiles, maxFileSize, headerObj
 
         setFiles(currentFiles)
 
-        resumable.removeFile(file)
+        resumable.current.removeFile(file)
     };
 
   const createFileList = () => {
@@ -148,10 +147,10 @@ function FileUpload({service, query, filetypes, maxFiles, maxFileSize, headerObj
                 </div>
                 <div
                     id={dropTargetID}
-                    ref={node => (dropZone = node)}
+                    ref={dropZoneRef}
                 >
                     <button
-                        ref={node => (uploader = node)}
+                        ref={uploaderRef}
                         id="browseButton"
                         className="pointer"
                     >

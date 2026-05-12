@@ -1,25 +1,27 @@
-import React, { Component } from 'react'
+import React from 'react'
 import placeholder from '../../images/compoundPlaceholderListView.svg'
 import { baseImageURL } from '../../utilities'
 
 function CompoundImage({compoundNumberClean, className, style}) {
   const [error, setError] = React.useState(false);
+  const timerHandle = React.useRef(null);
+
+  const stopTimeout = () => {
+        if (timerHandle.current) {
+            clearInterval(timerHandle.current)
+            timerHandle.current = null
+        }
+    };
+
   React.useEffect(() => {
-    let timerHandle;
-    timerHandle = setInterval(() => {
+    timerHandle.current = setInterval(() => {
             setError(true)
-        }, 3000) //3 second timeout
-    
+        }, 3000)
+
     return () => {
       stopTimeout()
     };
   }, []);
-
-  const stopTimeout = () => {
-        if (timerHandle) {
-            clearTimeout(timerHandle)
-        }
-    };
 
   const imageURL = `${baseImageURL}${compoundNumberClean}_Isometric.jpg`
 

@@ -1,4 +1,4 @@
-import React, { Component } from 'react'
+import React from 'react'
 import { CheckboxFilter, ClickableDiv } from '..'
 
 import {
@@ -10,38 +10,75 @@ import {
 import './table.css'
 
 function DropdownCell({options, activeFilters, filterMethod, formatTitle, grouping, cellIndex, classNames}) {
-  const [options, setOptions] = React.useState(this.options || []);
   const [open, setOpen] = React.useState(false);
+  const dropdownContainer = React.useRef(null);
+
+  const handleClick = React.useCallback((e) => {
+    if (dropdownContainer.current && !dropdownContainer.current.contains(e.target)) {
+      setOpen(false)
+    }
+  }, []);
+
   React.useEffect(() => {
     document.addEventListener('mousedown', handleClick, false)
-    
     return () => {
       document.removeEventListener('mousedown', handleClick, false)
     };
-  }, []);
+  }, [handleClick]);
 
-  const updateFilter = (filter, grouping) => {
-        const activeFilters = activeFilters
+  const updateFilter = (filter, filterGrouping) => {
         if (activeFilters.includes(filter)) {
-            filterMethod(filter, grouping, true)
+            filterMethod(filter, filterGrouping, true)
         } else {
-            filterMethod(filter, grouping, false)
+            filterMethod(filter, filterGrouping, false)
         }
     };
 
+  const renderDropdown = (opts) => {
+        return (
+            <div style={{ position: 'relative' }}>
+                <ClickableDiv
+                    classNameArr={['filter-dropdown-button', 'flex', 'space-between']}
+                    clickAction={() => setOpen(!open)}
+                >
+                    {formatTitle
+                        ? formatTitle(grouping)
+                        : toTitleCase(camelToHumanCase(grouping))}
+                    <div className={open ? 'filter-dropdown-triangle filter-triangle-flipped' : 'filter-dropdown-triangle'}>
+                        <span>&#9660;</span>
+                    </div>
+                </ClickableDiv>
+                {open && (
+                    <div className="filter-dropdown-container">
+                        {(opts || []).map(option => (
+                            <CheckboxFilter
+                                key={option}
+                                filter={option}
+                                grouping={grouping}
+                                isActive={activeFilters.includes(option)}
+                                updateFilter={updateFilter}
+                            />
+                        ))}
+                    </div>
+                )}
+            </div>
+        )
+    };
+
+  const cellClassNames = [...(classNames || []), 'Cell']
+
   return cellIndex === 0 ? (
-            // adds scope "row" to first cell of tbody row
             <th
                 scope="row"
-                className={classNames.join(' ')}
-                ref={node => (dropdownContainer = node)}
+                className={cellClassNames.join(' ')}
+                ref={dropdownContainer}
             >
                 {renderDropdown(options)}
             </th>
         ) : (
             <td
-                className={classNames.join(' ')}
-                ref={node => (dropdownContainer = node)}
+                className={cellClassNames.join(' ')}
+                ref={dropdownContainer}
             >
                 {renderDropdown(options)}
             </td>
