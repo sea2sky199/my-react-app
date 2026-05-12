@@ -1,4 +1,4 @@
-import React, { Fragment, Component } from 'react'
+import React, { Fragment } from 'react'
 import './admin.css'
 
 import { AdminModalShell } from '..'
@@ -12,26 +12,24 @@ import AdminCheckbox from './AdminCheckbox'
 
 function UserEditModal({userInfo, closeModal}) {
   const [isPending, setIsPending] = React.useState(false);
-  const [selectedRole, setSelectedRole] = React.useState(this.userInfo.role || null);
-  const [isPrivilegedPermissionEnabled, setIsPrivilegedPermissionEnabled] = React.useState(!!this.userInfo
-                .privileged_permission);
+  const [selectedRole, setSelectedRole] = React.useState(userInfo.role || null);
+  const [isPrivilegedPermissionEnabled, setIsPrivilegedPermissionEnabled] = React.useState(!!userInfo.privileged_permission);
   const [error, setError] = React.useState(false);
 
-  const togglePrivilegedPermission = () => {
-        this.setState({
-            isPrivilegedPermissionEnabled: !isPrivilegedPermissionEnabled,
-            error: false
-        })
+  const selectRole = (role) => {
+        setSelectedRole(role);
+        setError(false);
     };
 
-  const updateUser = () => {
-        const selectedRole = selectedRole
-        const isPrivilegedPermissionEnabled = isPrivilegedPermissionEnabled
+  const togglePrivilegedPermission = () => {
+        setIsPrivilegedPermissionEnabled(prev => !prev);
+        setError(false);
+    };
 
+  const updateUser = async () => {
         if (
             userInfo.role === selectedRole &&
-            !!userInfo.privileged_permission ===
-                isPrivilegedPermissionEnabled
+            !!userInfo.privileged_permission === isPrivilegedPermissionEnabled
         ) {
             return
         }
@@ -50,10 +48,12 @@ function UserEditModal({userInfo, closeModal}) {
                 userInfo.id,
                 'put'
             )
-            this.setState({ isPending: false, error: false })
+            setIsPending(false)
+            setError(false)
             closeModal(true)
         } catch (err) {
-            this.setState({ isPending: false, error: true })
+            setIsPending(false)
+            setError(true)
             console.log('Unable to update user', err)
         }
     };
@@ -107,62 +107,59 @@ function UserEditModal({userInfo, closeModal}) {
         return ''
     }
 
-  function isPrivilegedPermissionEnabled() {
-        return selectedRole !== 'GUEST'
-            ? isPrivilegedPermissionEnabled
-            : false
-    }
+  const effectivePrivilegedPermission = selectedRole !== 'GUEST'
+        ? isPrivilegedPermissionEnabled
+        : false;
 
   if (!userInfo.name) {
-            return null
-        }
+        return null
+    }
 
-        return (
-            <AdminModalShell
-                header={renderHeader()}
-                body={
-                    <Fragment>
-                        <div className="user-modal-body-segment">
-                            <AdminSelect
-                                title={'Role'}
-                                optionsMap={{
-                                    Guest: 'GUEST',
-                                    User: 'USER',
-                                    Administrator: 'ADMIN'
-                                }}
-                                selected={selectedRole}
-                                update={selectRole}
-                            />
+  return (
+        <AdminModalShell
+            header={renderHeader()}
+            body={
+                <Fragment>
+                    <div className="user-modal-body-segment">
+                        <AdminSelect
+                            title={'Role'}
+                            optionsMap={{
+                                Guest: 'GUEST',
+                                User: 'USER',
+                                Administrator: 'ADMIN'
+                            }}
+                            selected={selectedRole}
+                            update={selectRole}
+                        />
+                    </div>
+                    <div className="user-modal-body-segment">
+                        <AdminCheckbox
+                            header="Privileged Access"
+                            label="Privileged Access"
+                            checked={effectivePrivilegedPermission}
+                            className={privilegedPermissionClassName()}
+                            onChange={togglePrivilegedPermission}
+                            inputName="privileged_access_checkbox"
+                        />
+                    </div>
+                    {error && (
+                        <div
+                            className="error h7"
+                            style={{ padding: '0.5rem 2rem' }}
+                        >
+                            Error: Unable to Update User
                         </div>
-                        <div className="user-modal-body-segment">
-                            <AdminCheckbox
-                                header="Privileged Access"
-                                label="Privileged Access"
-                                checked={isPrivilegedPermissionEnabled}
-                                className={privilegedPermissionClassName}
-                                onChange={togglePrivilegedPermission}
-                                inputName="privileged_access_checkbox"
-                            />
-                        </div>
-                        {error && (
-                            <div
-                                className="error h7"
-                                style={{ padding: '0.5rem 2rem' }}
-                            >
-                                Error: Unable to Update User
-                            </div>
-                        )}
-                    </Fragment>
-                }
-                submitModal={() => updateUser()}
-                closeModal={closeModal}
-                isHoldOnSubmission={
-                    userInfo.role === selectedRole &&
-                    !!userInfo.privileged_permission ===
-                        isPrivilegedPermissionEnabled
-                }
-            />
-        );
+                    )}
+                </Fragment>
+            }
+            submitModal={() => updateUser()}
+            closeModal={closeModal}
+            isHoldOnSubmission={
+                userInfo.role === selectedRole &&
+                !!userInfo.privileged_permission === effectivePrivilegedPermission
+            }
+        />
+    );
 }
 
 export default UserEditModal
