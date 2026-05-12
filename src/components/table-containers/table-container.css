@@ -1,0 +1,260 @@
+.DataTable {
+    position: relative;
+    border-collapse: collapse;
+}
+
+.TableCaptionBar {
+    position: relative;
+    background-color: #ffffff;
+    padding-left: 2rem;
+    height: 12vh;
+    width: 100%;
+    min-height: 5vh;
+}
+
+.TableCaptionBarFilterContainer {
+    padding-right: 1rem;
+    border-right: 1px solid #e5e5e5;
+}
+
+.reset-filters {
+    color: #b9b9b9;
+    white-space: nowrap;
+}
+
+.TableCaptionBarButtonContainer {
+    flex-wrap: wrap;
+    padding: 0 1.5rem 0 1rem;
+}
+
+.TableCaptionBarButton {
+    border: 1px solid #ea3796;
+    color: #ea3796;
+    background-color: #ffffff;
+    height: 1.5rem;
+    padding: 0 0.75rem;
+    border-radius: 16px;
+    margin: 0.25rem 0 0.25rem 0.5rem;
+    white-space: nowrap;
+}
+
+.TableCaptionBarButton:disabled {
+    color: #999999;
+    border-color: #999999;
+    cursor: default;
+}
+
+.TableCaptionBarButton:not(:disabled):hover {
+    border: 1px solid #ea3796;
+    background-color: #ea3796;
+    color: #ffffff;
+}
+
+.TableCaptionBarButton:focus {
+    outline: none;
+}
+
+.compounds-search-input {
+    font-size: 12px;
+    padding: 0.25rem;
+}
+
+.ScrollContainer {
+    overflow: auto;
+    height: calc(
+        74vh - 5rem
+    ); /* 100vh - 10vh (navbar) - 4vh (breadcrumbs) - 12vh (table caption bar) - 5rem (footer)*/
+    width: 100%;
+    background-color: #ffffff;
+    /* margin-left is for fixed columns
+      margin-left: 145px; */
+}
+
+.Table {
+    border: none;
+    border-collapse: separate;
+    border-spacing: 0;
+    background: #fff;
+    width: 100%;
+}
+
+.Table thead th {
+    background-color: #999999;
+    color: #ffffff;
+    text-align: left;
+    position: sticky;
+    top: 0;
+    white-space: nowrap;
+    height: 2.5rem;
+    z-index: 2;
+}
+
+.Table thead td {
+    z-index: 1;
+}
+
+.Table tbody td {
+    border-bottom: solid 1px #f6f6f6;
+    white-space: nowrap;
+}
+
+.Table tr:hover {
+    background-color: #f2f2f2;
+}
+
+.Table .multi-select-row:hover {
+    background-color: #fdf3fb;
+}
+
+.compounds-header-cell > div {
+    padding-top: 2px;
+}
+
+.compounds-header-cell:hover,
+.users-header-cell:hover {
+    text-decoration: underline;
+}
+
+.infinite-scroll-container {
+    height: 80vh;
+    width: 100%;
+    overflow: auto;
+}
+
+.cell-container {
+    padding-right: 1rem;
+}
+
+.user-change-button {
+    color: #ffffff;
+    width: 20px;
+    height: 20px;
+    background: #ea3796;
+    -moz-border-radius: 70px;
+    -webkit-border-radius: 70px;
+    border-radius: 70px;
+}
+
+.user-change-button:hover,
+.user-change-button:focus {
+    background-color: #ef88b8;
+}
+
+.filter-cell {
+    position: sticky;
+    top: 2.5rem;
+    background-color: #e5e5e5 !important;
+    color: black !important;
+    font-weight: normal;
+}
+
+@media all and (-ms-high-contrast: none), (-ms-high-contrast: active) {
+    .filter-cell {
+        position: relative;
+        top: 0;
+        left: 0;
+    }
+}
+
+.part-table-image {
+    height: 50px;
+    width: 50px;
+    margin-right: 1rem;
+    border-radius: 2px;
+}
+
+.compounds-result-caption-container {
+    max-height: 2rem;
+    max-width: 32rem;
+    overflow-y: auto;
+}
+
+.compoundNumber-search-not-found-container {
+    margin: auto 0 1px 0.5rem;
+    padding-left: 1rem;
+    max-height: 12vh;
+    max-width: 32rem;
+    border-left: solid 1px #d8d8d8;
+    overflow-y: auto;
+}
+
+.compounds-table-unreleased-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 50px;
+    padding: 4px 0;
+    text-align: center;
+    overflow: hidden;
+    background-color: #b8b8b8;
+    color: #ffffff;
+    opacity: 0.5;
+}
+
+.username-link {
+    text-decoration: none;
+    color: #ea3796;
+}
+
+.column-config {
+    color: #ffffff;
+    height: 2.5rem;
+    width: 3rem;
+    padding: 0.6rem 1.4rem;
+    position: absolute;
+    top: 0;
+    left: 0;
+    background: linear-gradient(to right, #999999 2.4rem, transparent 3rem);
+}
+
+.column-config:not(.open):hover i {
+    color: #ea3796;
+}
+
+.compounds th:first-child,
+.compounds td:first-child {
+    padding-left: 4rem;
+}
+
+.results.slider-container {
+    background-color: #eeeeee;
+    display: flex;
+    border-radius: 4px;
+    margin: 0.25rem 0 0.25rem 0.5rem;
+    font-weight: 300;
+}
+
+.results.slider-container .slider-label {
+    padding: 0 0.5rem;
+    background-color: #c1c4ce;
+    color: #ffffff;
+    display: inline-block;
+    height: 1.5rem;
+    line-height: 1.5rem;
+    font-size: 12px;
+    border-radius: 4px 0 0 4px;
+}
+
+.results.slider-container .slider-sublabel {
+    font-size: 9px;
+    display: inline-block;
+    /* display: none; */
+    height: 1.5rem;
+    line-height: 1.5rem;
+    text-transform: uppercase;
+}
+
+.results.slider-container .slider-label + .slider-sublabel {
+    margin-left: 0.75rem;
+}
+
+.results.slider-container .slider-sublabel:last-child {
+    margin-right: 0.75rem;
+}
+
+.compounds-selected-caption {
+    position: absolute;
+    bottom: 3px;
+    right: 0;
+    padding: 0.25rem 2rem;
+}

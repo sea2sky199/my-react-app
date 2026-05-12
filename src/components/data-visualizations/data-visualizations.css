@@ -1,0 +1,77 @@
+.canvas {
+    width: 100%;
+    height: 100%;
+    position: relative;
+}
+
+.opportunity-canvas {
+    width: 100%;
+    height: 80%;
+    position: relative;
+}
+
+.icicle {
+    position: absolute;
+    top: 0;
+    left: 0;
+    overflow: hidden;
+}
+
+.icicle-title-group {
+    fill: #ffffff;
+}
+
+.icicle-title-group:hover {
+    fill: #000000;
+}
+
+.canvas-scrollable {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    overflow-y: auto;
+    overflow-x: hidden;
+}
+
+#opportunity-tooltip {
+    position: absolute;
+    border-radius: 2px;
+    z-index: 5;
+    transition: opacity 250ms ease-in;
+}
+
+#opportunity-tooltip-img {
+    height: 70px;
+    width: 75px;
+    background-size: cover;
+    background-position: center;
+    object-fit: cover;
+}
+
+#opportunity-tooltip-compoundNumber {
+    height: 1rem;
+    width: 75px;
+    color: #ffffff;
+    background-color: #000000;
+    overflow: hidden;
+}
+
+.grid-lines {
+    stroke: lightgrey;
+    stroke-opacity: 0.2;
+    shape-rendering: crispEdges;
+}
+
+.z-score-y-axis-label {
+    position: absolute;
+    top: 45%;
+    left: 1.8rem;
+    transform: rotate(-90deg);
+    transform-origin: top left;
+}
+
+.z-score-description-container {
+    max-width: 20rem;
+    padding: 0.5rem 1rem;
+    line-height: 18px;
+}

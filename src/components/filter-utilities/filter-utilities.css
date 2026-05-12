@@ -1,0 +1,46 @@
+.grid-keyword-search-select {
+    position: relative;
+    width: 50%;
+    height: 1.7rem;
+    margin-bottom: 1rem;
+    border: solid 1px #ef88b8;
+    border-left: 0;
+    padding: 0 0.25rem;
+    vertical-align: middle;
+    line-height: 1.7rem;
+    color: #ffffff;
+    background-color: #ef88b8;
+}
+
+.grid-keyword-select-options-container {
+    position: absolute;
+    z-index: 2;
+    background-color: #ffffff;
+    color: #000000;
+    width: 100%;
+    margin-left: -0.25rem;
+    margin-bottom: 1rem;
+    box-shadow: 0px 1px 4px 0px #999999;
+}
+
+.spacer {
+    height: 1rem;
+    margin-bottom: -1rem;
+    background: transparent;
+}
+
+.grid-keyword-select-option {
+    padding: 0 0.25rem;
+}
+
+.grid-keyword-select-option:hover {
+    background-color: #f2f2f2;
+}
+
+.grid-filter-caption-container {
+    padding: 0.25rem 0;
+}
+
+.grid-filter-caption-container:hover {
+    color: #999999;
+}

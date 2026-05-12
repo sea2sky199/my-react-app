@@ -1,0 +1,53 @@
+.rheostat {
+    position: relative;
+    overflow: visible;
+}
+
+.DefaultBackground_background__horizontal {
+    height: 5px;
+    top: 2px;
+    border: none;
+    border-radius: 5px;
+    width: 100%;
+}
+
+.DefaultBackground {
+    position: relative;
+    background-color: #ebebeb;
+}
+
+.DefaultProgressBar_background__horizontal {
+    height: 5px;
+    top: 2px;
+}
+
+.DefaultProgressBar_progressBar {
+    background-color: #f4cce7;
+    position: absolute;
+}
+
+.handleContainer {
+    height: 15px;
+    top: -4px;
+    left: -4px;
+    bottom: 4px;
+    width: 100%;
+    position: absolute;
+}
+
+.DefaultHandle_handle__horizontal {
+    top: 4px;
+}
+
+.DefaultHandle_handle {
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    width: 8px;
+    height: 8px;
+    padding: 0;
+    border: none;
+    background-color: #ea3796;
+    border-radius: 70px;
+    outline: none;
+    z-index: 1;
+}

@@ -1,0 +1,61 @@
+.carousel {
+    height: 100%;
+    width: 100%;
+    position: relative;
+}
+
+.image-slide {
+    max-height: 100%;
+    max-width: 100%;
+    object-fit: contain;
+    flex-shrink: 0;
+}
+
+.slide-arrow {
+    cursor: pointer;
+    font-size: 2rem;
+    position: absolute;
+    top: 35%;
+    opacity: 0;
+}
+
+.slide-arrow:hover {
+    opacity: 1;
+}
+
+.slide-arrow.right {
+    right: 1.5rem;
+}
+
+.slide-arrow.left {
+    left: 1.5rem;
+}
+
+.carousel-arrow-icon {
+    color: #9e9ebb;
+}
+
+.carousel-routing-buttons-container {
+    position: absolute;
+    bottom: 0;
+    right: 0;
+    padding: 0.5rem;
+}
+
+.carousel-routing-button {
+    position: relative;
+    height: 3rem;
+    width: 3rem;
+    border: none;
+    margin: 0.4rem;
+    border: 1px solid #999999;
+}
+
+.carousel-routing-button-layer {
+    background-color: rgba(0, 0, 0, 0.4);
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+}

@@ -1,0 +1,41 @@
+.help-center-container {
+    background-color: #ffffff;
+}
+
+.help-center-header {
+    padding: 1rem 2rem;
+    background-color: #999999;
+    color: #ffffff;
+}
+
+.help-center-body p {
+    line-height: 24px;
+    font-weight: 400;
+    margin: 0.5rem 0;
+}
+
+.help-center-body ol li {
+    font-weight: 600;
+    padding-bottom: 2rem;
+}
+
+.help-center-body ul li {
+    font-weight: 400;
+    padding-bottom: 0.5rem;
+}
+
+.help-center-list-item {
+    padding: 0 2rem 1rem 2rem;
+    color: #c9c9c9;
+    user-select: none;
+}
+
+.help-center-list-item:hover {
+    color: #000000;
+}
+
+.help-center-list-item-active {
+    color: #000000;
+    font-weight: 500;
+    text-decoration: underline 2px solid #ea3796;
+}

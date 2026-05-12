@@ -1,0 +1,1 @@
+export const flattenArray = arr => arr.reduce((acc, value) => acc.concat(value), [])

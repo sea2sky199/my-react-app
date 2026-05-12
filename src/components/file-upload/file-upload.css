@@ -1,0 +1,23 @@
+#dropTarget {
+    border: 1px solid #efefef;
+    color: #999999;
+    font-style: italic;
+    width: 100%;
+    padding: 0.5rem 1rem;
+}
+
+#browseButton {
+    background-color: #ea3796;
+    color: #fff;
+    border: none;
+    padding: 0.3rem 1.25rem;
+}
+
+.progress-bar {
+    background-color: blue;
+    height: 4px;
+}
+
+.resumable-list {
+    color: #000;
+}

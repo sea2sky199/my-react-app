@@ -1,0 +1,85 @@
+.information-icon svg {
+    margin: -2px 0 0 0;
+}
+
+.information-icon {
+    display: inline;
+    margin-left: 0.25rem;
+    background: radial-gradient(#ffffff 3px, transparent 3px);
+}
+
+.information-modal-container {
+    position: absolute;
+    width: max-content;
+    z-index: 4;
+    border-radius: 15px;
+    overflow: hidden;
+    border: 1px solid #efefef;
+    cursor: default;
+    filter: drop-shadow(1px 1px 5px rgba(0, 0, 0, 0.25))
+        drop-shadow(-1px -1px rgba(0, 0, 0, 0.125));
+}
+
+.quantity-of-results-description-body {
+    max-width: 30rem;
+    color: #000;
+    background-color: #fff;
+    padding: 0.5rem 1rem;
+    line-height: 18px;
+}
+
+.quantity-of-results-description-body p {
+    margin: 0;
+}
+
+.size-code-description-container {
+    background-color: #d8d8d8;
+    width: 14rem;
+    padding: 10px 15px;
+    color: #000;
+    line-height: 18px;
+    max-height: 58vh;
+    overflow-y: auto;
+}
+
+.size-code-description-container p {
+    margin: 0;
+}
+
+.size-code-buttons-container {
+    flex-grow: 2;
+    flex-flow: row wrap;
+    background-color: #ffffff;
+    color: #000;
+    padding: 10px 15px;
+}
+
+.size-code-description-button {
+    border: 1px solid #ef88b8;
+    border-radius: 50%;
+    color: #ef88b8;
+    margin: auto 8px;
+    height: 2.5rem;
+    width: 2.5rem;
+}
+
+.size-code-description-button:hover {
+    background-color: #efefef;
+}
+
+.size-code-description-button-active {
+    background-color: #ef88b8;
+    color: #fff;
+}
+
+.size-code-description-button-active:hover {
+    background-color: #ef88b8;
+    color: #fff;
+}
+
+.size-code-individual-description {
+    flex-grow: 1;
+    color: #000;
+    padding: 15px 20px;
+    background-color: #fff;
+}

@@ -1,0 +1,152 @@
+.request-access-container {
+    float: left;
+    width: 80%;
+    color: #ffffff;
+    text-align: center;
+    padding: 20vh 0 10vh 0;
+    overflow: auto;
+}
+
+.request-access-logo-container {
+    padding: 0 30%;
+    background-color: #333335;
+}
+
+.request-access-description {
+    padding: 5% 30% 5% 30%;
+    text-align: justify;
+    line-height: 24px;
+}
+
+.request-access-button {
+    border: none;
+    background-color: #ea3796;
+    padding: 1rem 3rem;
+    color: #ffffff;
+    text-decoration: none;
+    border-radius: 22px;
+    height: 50px;
+    width: 200px;
+}
+
+.request-access-sidebar-container {
+    float: left;
+    width: 20%;
+    height: calc(100vh - 5rem);
+    background-color: #e5e5e5;
+    overflow: auto;
+}
+
+.access-requirements-container {
+    background-color: #fff;
+    padding: 0.25rem 1rem;
+    max-width: 30rem;
+}
+
+.sidebar-list-item {
+    flex-grow: 1;
+    border-bottom: 1px solid black;
+    text-align: center;
+}
+
+.sidebar-text-container {
+    width: 100%;
+}
+
+.sidebar-list-title {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.sidebar-list-description {
+    padding-top: 4px;
+}
+
+.home-container {
+    background-color: #ffffff;
+}
+
+.home-welcome-banner {
+    padding: 2rem 2rem 0 2rem;
+}
+
+.home-description-banner {
+    padding: 1rem 2rem 0 2rem;
+    line-height: 24px;
+}
+
+.home-icicle-chart-container {
+    padding: 0rem 2rem 1rem 2rem;
+    flex-grow: 1;
+    align-items: stretch;
+}
+
+.home-tab-container {
+    padding: 2rem 0 1rem 2rem;
+}
+
+.home-tab {
+    margin-right: 1rem;
+    color: #999999;
+    font-weight: 300;
+}
+
+.home-tab-active {
+    color: #000000;
+    font-weight: 500;
+    border-bottom: solid 1px #ea3796;
+}
+
+.home-search-container {
+    flex-grow: 1;
+    background-color: #f3f3f3;
+    border-top: 1px solid #d8d8d8;
+    overflow: auto;
+}
+
+.home-search-input {
+    padding: 0 2.5rem 0 2rem;
+    height: 3rem;
+    width: 100%;
+    border-radius: 3rem;
+    border: none;
+    box-shadow: 2px 2px 4px 0px #c5c5c5;
+    color: #000000;
+}
+
+/* clears the 'X' from Internet Explorer */
+.home-search-input::-ms-clear {
+    display: none;
+    width: 0;
+    height: 0;
+}
+.home-search-input::-ms-reveal {
+    display: none;
+    width: 0;
+    height: 0;
+}
+
+/* clears the 'X' from Chrome */
+.home-search-input::-webkit-search-decoration,
+.home-search-input::-webkit-search-cancel-button,
+.home-search-input::-webkit-search-results-button,
+.home-search-input::-webkit-search-results-decoration {
+    display: none;
+}
+
+.home-search-results-container {
+    margin-top: 1px;
+    height: 2.5rem;
+    border: 1px solid #999999;
+    background-color: #ffffff;
+    box-shadow: 3px 3px 6px 2px #999999;
+}
+
+.home-search-result {
+    height: 2.5rem;
+    line-height: 2.5rem;
+    padding: 0 2rem;
+    color: #ffffff;
+    background-color: #90ccf9;
+}

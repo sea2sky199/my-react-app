@@ -1,0 +1,45 @@
+.form-disabled * {
+    -webkit-filter: blur(4px) opacity(0.25);
+    filter: blur(4px) opacity(0.25);
+    transition: filter 250ms;
+    position: relative;
+}
+
+.form-disabled:after {
+    content: '';
+    position: absolute;
+    display: block;
+    right: 0;
+    bottom: 0;
+    top: 0;
+    left: 0;
+    background-color: rgba(150, 150, 150, 0.125);
+    z-index: 2;
+}
+
+.user-modal-body-segment {
+    border-bottom: solid 1px #efefef;
+    padding: 1rem 2rem;
+    position: relative;
+}
+
+.user-modal-body-segment:last-child {
+    border-bottom: none;
+}
+
+.add-user-modal-chemdw-info {
+    padding-bottom: 0.1rem;
+    color: #999999;
+}
+
+.add-user-modal-chemdw-info:last-child {
+    padding-bottom: none;
+}
+
+.modal-text-input {
+    width: 100%;
+    padding: 0.5rem;
+    margin-bottom: 1rem;
+    border: 0.5px solid #c1c4ce;
+    font-family: Helvetica Neue, Helvetica, Arial, sans serif;
+}
