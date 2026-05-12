@@ -1,47 +1,51 @@
-import React, { Component } from 'react'
-import { withRouter } from 'react-router-dom'
-import { observer, inject } from 'mobx-react'
+import React from 'react'
+import { useLocation } from 'react-router-dom'
 
 import { AdminModalShell, AdminSelect } from '..'
 import { hasClass, contactEmail, version, siteName } from '../../utilities'
 import EmailService from '../../data/EmailService'
 
-function FeedbackModal({userInfoStore, showFeedbackModalEvent, history, instantiateModalAndEvent}) {
-  const [title, setTitle] = React.useState(null);
-  const [feedbackType, setFeedbackType] = React.useState(null);
-  const [feedbackBody, setFeedbackBody] = React.useState(null);
-  const [error, setError] = React.useState(null);
-  const [showing, setShowing] = React.useState(null);
-  React.useEffect(() => {
-    modalShowEvent.addEventListener(
-            showFeedbackModalEvent,
-            showFeedbackModal
-        )
-    
-    return () => {
-      modalShowEvent.removeEventListener(
-            showFeedbackModalEvent,
-            showFeedbackModal
-        )
-    };
-  }, []);
+function FeedbackModal({showing, onClose, userInfo = {}}) {
+  const location = useLocation();
+
+  const [title, setTitle] = React.useState('');
+  const [feedbackType, setFeedbackType] = React.useState('');
+  const [feedbackBodyText, setFeedbackBodyText] = React.useState('');
+  const [error, setError] = React.useState(false);
 
   const hideFeedbackModal = () => {
-        this.setState(defaultState)
+        setTitle('');
+        setFeedbackType('');
+        setFeedbackBodyText('');
+        setError(false);
+        onClose();
     };
 
-  const showFeedbackModal = () => {
-        setShowing(true)
-    };
+  function isFeedbackTypePresent() {
+        return feedbackType !== ''
+    }
 
-  const sendFeedback = () => {
+  function buildFeedbackBody() {
+        return `${
+            isFeedbackTypePresent()
+                ? `Feedback Type: ${feedbackType}`
+                : ''
+        }
+        Feedback: ${feedbackBodyText}
+        Version: ${version}
+        Path: ${location.pathname}
+        User: ${userInfo.name}
+        User BEMS: ${userInfo.user_id}
+        User Role: ${userInfo.role}`
+    }
+
+  const sendFeedback = async () => {
         try {
-            const subject =
-                title || feedbackType || 'User Feedback'
-            await userEmailService.send(
-                feedbackRecipientArr,
+            const subject = title || feedbackType || 'User Feedback'
+            await EmailService.send(
+                [contactEmail],
                 subject,
-                feedbackBody
+                buildFeedbackBody()
             )
             hideFeedbackModal()
         } catch (err) {
@@ -49,35 +53,16 @@ function FeedbackModal({userInfoStore, showFeedbackModalEvent, history, instanti
         }
     };
 
-  function feedbackBody() {
-        const userInfo = userInfoStore.userInfo
-        return `${
-            isFeedbackTypePresent
-                ? `Feedback Type: ${feedbackType}`
-                : ''
-        }
-        Feedback: ${feedbackBody}
-        Version: ${version}
-        Path: ${history.location.pathname}
-        User: ${userInfo.name}
-        User BEMS: ${userInfo.user_id}
-        User Role: ${userInfo.role}`
-    }
-
-  function isFeedbackTypePresent() {
-        return feedbackType !== ''
-    }
-
   function isTitlePresent() {
-        return isPresent(title.trim().length)
+        return title.trim().length > 0
     }
 
   function isFeedbackBodyValid() {
-        return isPresent(feedbackBody.trim().length)
+        return feedbackBodyText.trim().length > 0
     }
 
   function isFormValid() {
-        return isFeedbackBodyValid
+        return isFeedbackBodyValid()
     }
 
   const renderBody = () => {
@@ -98,7 +83,8 @@ function FeedbackModal({userInfoStore, showFeedbackModalEvent, history, instanti
                     labelClassNamesArr={['h6', 'semi-thin']}
                     labelStyle={{ paddingBottom: '0.3rem' }}
                     update={selection => {
-                        this.setState({ feedbackType: selection, error: false })
+                        setFeedbackType(selection);
+                        setError(false);
                     }}
                     style={{ paddingBottom: '0.75rem' }}
                 />
@@ -107,17 +93,15 @@ function FeedbackModal({userInfoStore, showFeedbackModalEvent, history, instanti
                     type="text"
                     className="h5-5 modal-text-input"
                     value={title}
-                    onChange={e =>
-                        this.setState({
-                            title: e.target.value,
-                            error: false
-                        })
-                    }
+                    onChange={e => {
+                        setTitle(e.target.value);
+                        setError(false);
+                    }}
                 />
                 <div
                     className={`${hasClass([
                         'required',
-                        !isFeedbackBodyValid
+                        !isFeedbackBodyValid()
                     ])}`}
                     style={{ paddingBottom: '0.5rem' }}
                 >
@@ -126,13 +110,11 @@ function FeedbackModal({userInfoStore, showFeedbackModalEvent, history, instanti
                 <textarea
                     className="h5-5 text-area"
                     style={{ maxHeight: '18vh' }}
-                    value={feedbackBody}
-                    onChange={e =>
-                        this.setState({
-                            feedbackBody: e.target.value,
-                            error: false
-                        })
-                    }
+                    value={feedbackBodyText}
+                    onChange={e => {
+                        setFeedbackBodyText(e.target.value);
+                        setError(false);
+                    }}
                 ></textarea>
                 {error && (
                     <div className="h7 error">Feedback Was Unable to Send</div>
@@ -142,36 +124,36 @@ function FeedbackModal({userInfoStore, showFeedbackModalEvent, history, instanti
     };
 
   return (
-            showing && (
-                <AdminModalShell
-                    header={
+        showing && (
+            <AdminModalShell
+                header={
+                    <div
+                        className="h4 flex-column"
+                        style={{
+                            color: '#FFFFFF',
+                            padding: '1.5rem 0 1.5rem 2rem'
+                        }}
+                    >
+                        <div className="h3">Leave Feedback</div>
                         <div
-                            className="h4 flex-column"
-                            style={{
-                                color: '#FFFFFF',
-                                padding: '1.5rem 0 1.5rem 2rem'
-                            }}
-                        >
-                            <div className="h3">Leave Feedback</div>
-                            <div
-                                className="h6-5 semi-thin"
-                                style={{ padding: '0.5rem 3rem 0 0' }}
-                            >{`Help us improve ${siteName}. Any kind of feedback is highly appreciated.`}</div>
-                        </div>
-                    }
-                    body={renderBody()}
-                    closeModal={hideFeedbackModal}
-                    submitModal={sendFeedback}
-                    submitText="Submit"
-                    isHoldOnSubmission={!isFormValid}
-                    style={{ overflowY: 'auto' }}
-                    containerStyle={{
-                        width: '70%',
-                        height: '70vh'
-                    }}
-                />
-            )
-        );
+                            className="h6-5 semi-thin"
+                            style={{ padding: '0.5rem 3rem 0 0' }}
+                        >{`Help us improve ${siteName}. Any kind of feedback is highly appreciated.`}</div>
+                    </div>
+                }
+                body={renderBody()}
+                closeModal={hideFeedbackModal}
+                submitModal={sendFeedback}
+                submitText="Submit"
+                isHoldOnSubmission={!isFormValid()}
+                style={{ overflowY: 'auto' }}
+                containerStyle={{
+                    width: '70%',
+                    height: '70vh'
+                }}
+            />
+        )
+    );
 }
 
-export default withRouter(inject('userInfoStore')(observer(FeedbackModal)))
+export default FeedbackModal
