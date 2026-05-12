@@ -1,39 +1,19 @@
-import React, { Component } from 'react'
+import React from 'react'
 
 import { AdminModalShell } from '../../components'
 import { hasClass, contactEmail } from '../../utilities'
 import EmailService from '../../data/EmailService'
 
-function ContactUsersModal({showContactUsersEvent, users, showContactUsers}) {
-  const [showing, setShowing] = React.useState(false);
+function ContactUsersModal({showing, onClose, users}) {
   const [subject, setSubject] = React.useState('');
   const [messageBody, setMessageBody] = React.useState('');
   const [error, setError] = React.useState(false);
-  React.useEffect(() => {
-    modalShowEvent.addEventListener(
-            showContactUsersEvent,
-            showContactUsers
-        )
-    
-    return () => {
-      modalShowEvent.removeEventListener(
-            showContactUsersEvent,
-            showContactUsers
-        )
-    };
-  }, []);
 
   const hideContactUsers = () => {
-        this.setState({
-            showing: false,
-            subject: '',
-            messageBody: '',
-            error: false
-        })
-    };
-
-  const showContactUsers = () => {
-        setShowing(true)
+        setSubject('');
+        setMessageBody('');
+        setError(false);
+        onClose();
     };
 
   function userNonGuestEmailArray() {
@@ -45,10 +25,10 @@ function ContactUsersModal({showContactUsersEvent, users, showContactUsers}) {
         }, [])
     }
 
-  const submitMessage = () => {
+  const submitMessage = async () => {
         try {
-            await adminEmailService.send(
-                userNonGuestEmailArray,
+            await EmailService.send(
+                userNonGuestEmailArray(),
                 subject,
                 messageBody
             )
@@ -59,15 +39,15 @@ function ContactUsersModal({showContactUsersEvent, users, showContactUsers}) {
     };
 
   function isSubjectValid() {
-        return isPresent(subject.trim().length)
+        return subject.trim().length > 0
     }
 
   function isMessageBodyValid() {
-        return isPresent(messageBody.trim().length)
+        return messageBody.trim().length > 0
     }
 
   function isFormValid() {
-        return isSubjectValid && isMessageBodyValid
+        return isSubjectValid() && isMessageBodyValid()
     }
 
   const renderBody = () => {
@@ -76,7 +56,7 @@ function ContactUsersModal({showContactUsersEvent, users, showContactUsers}) {
                 <div
                     className={`h5 ${hasClass([
                         'required',
-                        !isSubjectValid
+                        !isSubjectValid()
                     ])}`}
                     style={{ paddingBottom: '0.5rem' }}
                 >
@@ -86,18 +66,16 @@ function ContactUsersModal({showContactUsersEvent, users, showContactUsers}) {
                     type="text"
                     className="h5-5 modal-text-input"
                     value={subject}
-                    onChange={e =>
-                        this.setState({
-                            subject: e.target.value,
-                            error: false
-                        })
-                    }
+                    onChange={e => {
+                        setSubject(e.target.value);
+                        setError(false);
+                    }}
                 />
                 <div className="flex space-between">
                     <div
                         className={`h5 ${hasClass([
                             'required',
-                            !isMessageBodyValid
+                            !isMessageBodyValid()
                         ])}`}
                         style={{ paddingBottom: '0.5rem' }}
                     >
@@ -107,19 +85,17 @@ function ContactUsersModal({showContactUsersEvent, users, showContactUsers}) {
                         className="h6 semi-thin"
                         style={{ marginTop: '0.25rem' }}
                     >
-                        {`${userNonGuestEmailArray.length} Users will recieve this message`}
+                        {`${userNonGuestEmailArray().length} Users will recieve this message`}
                     </div>
                 </div>
                 <textarea
                     className="h5-5 text-area"
                     style={{ maxHeight: '30vh' }}
                     value={messageBody}
-                    onChange={e =>
-                        this.setState({
-                            messageBody: e.target.value,
-                            error: false
-                        })
-                    }
+                    onChange={e => {
+                        setMessageBody(e.target.value);
+                        setError(false);
+                    }}
                 ></textarea>
                 {error && (
                     <div className="h7 error">Email Was Unable to Send</div>
@@ -129,32 +105,32 @@ function ContactUsersModal({showContactUsersEvent, users, showContactUsers}) {
     };
 
   return (
-            showing && (
-                <AdminModalShell
-                    header={
-                        <div
-                            className="h4"
-                            style={{
-                                color: '#FFFFFF',
-                                padding: '1.5rem 20rem 1.5rem 2rem'
-                            }}
-                        >
-                            Contact Users
-                        </div>
-                    }
-                    body={renderBody()}
-                    closeModal={hideContactUsers}
-                    submitModal={submitMessage}
-                    submitText="Send"
-                    isHoldOnSubmission={!isFormValid}
-                    style={{ overflowY: 'auto' }}
-                    containerStyle={{
-                        width: '70%',
-                        height: '70vh'
-                    }}
-                />
-            )
-        );
+        showing && (
+            <AdminModalShell
+                header={
+                    <div
+                        className="h4"
+                        style={{
+                            color: '#FFFFFF',
+                            padding: '1.5rem 20rem 1.5rem 2rem'
+                        }}
+                    >
+                        Contact Users
+                    </div>
+                }
+                body={renderBody()}
+                closeModal={hideContactUsers}
+                submitModal={submitMessage}
+                submitText="Send"
+                isHoldOnSubmission={!isFormValid()}
+                style={{ overflowY: 'auto' }}
+                containerStyle={{
+                    width: '70%',
+                    height: '70vh'
+                }}
+            />
+        )
+    );
 }
 
 export default ContactUsersModal
