@@ -1,9 +1,10 @@
-import React, { Component } from 'react'
+import React from 'react'
 import { ClickableDiv } from '..'
 import { sizeCodeOrder, sizeCodeRanges, hasClass } from '../../utilities'
 
 function SizeCodeDescription() {
   const [activeIndex, setActiveIndex] = React.useState(0);
+  const sizeCodeConfig = sizeCodeOrder.map(code => [code, sizeCodeRanges[code] || []]);
 
   return (
             <div className="flex">

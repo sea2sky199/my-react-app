@@ -1,4 +1,4 @@
-import React, { Component } from 'react'
+import React from 'react'
 import './layout.css'
 import { version, getChemDWProprietary, siteName } from '../../utilities'
 import { Icon } from 'react-icons-kit'

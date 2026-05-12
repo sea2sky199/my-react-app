@@ -1,7 +1,5 @@
-import React, { Component, Fragment } from 'react'
-import { withRouter } from 'react-router-dom'
-import { observer, inject } from 'mobx-react'
-import { autorun } from 'mobx'
+import React, { Fragment } from 'react'
+import { useNavigate, useLocation } from 'react-router-dom'
 
 import {
     CompoundsTableContainer,
@@ -38,64 +36,58 @@ import {
 } from '../../utilities'
 import Compare from '../compare/Compare'
 
-function AllCompoundsContainer({history, columnsConfigStore, isSimilarityView, compoundInfoForSimilarityView, selectedCompoundStore, userInfoStore, title, compoundsColumnsConfigStore}) {
+function AllCompoundsContainer({columnsConfigStore, isSimilarityView, compoundInfoForSimilarityView, selectedCompoundStore, userInfoStore, title, compoundsColumnsConfigStore}) {
+  const navigate = useNavigate();
+  const location = useLocation();
+  const locationRef = React.useRef(location);
+  React.useEffect(() => { locationRef.current = location }, [location]);
+
   const [accessors, setAccessors] = React.useState([]);
   const [columns, setColumns] = React.useState([]);
   const [data, setData] = React.useState([]);
   const [dataMap, setDataMap] = React.useState(new Map());
-  const [queryParam, setQueryParam] = React.useState(this.history.location.search);
   const [totalDataLength, setTotalDataLength] = React.useState(undefined);
   const [filterOptions, setFilterOptions] = React.useState({});
   const [filterRanges, setFilterRanges] = React.useState({});
   const [loading, setLoading] = React.useState(false);
-  const [sort, setSort] = React.useState({
-                name: '',
-                ascending: true,
-            });
-  const [isGridView, setIsGridView] = React.useState(isGridView);
-  const [isSimilarityView, setIsSimilarityView] = React.useState(this.isSimilarityView);
+  const [sort, setSort] = React.useState({ name: '', ascending: true });
+  const [isGridView, setIsGridView] = React.useState(false);
   const [isCompareCompoundToLibraryModalInView, setIsCompareCompoundToLibraryModalInView] = React.useState(false);
-  const [columnsConfigStore, setColumnsConfigStore] = React.useState(null);
   const [n_compounds, setN_compounds] = React.useState(null);
   const gridViewComponent = React.useRef(null);
-  const prevQueryParamRef = React.useRef();
-  React.useEffect(() => {
-    disposers.push(
-            autorun(() => {
-                setAccessors(columnsConfigStore.accessors)
-            })
-        )
+  const scrollParentRef = React.useRef(null);
 
-        disposers.push(
-            autorun(() => {
-                setColumns(columnsConfigStore.columnsConfig)
-            })
-        )
-    
-    return () => {
-      clearAndCloseMultiSelection()
-        disposers.forEach((disposer) => disposer())
-    };
-  }, []);
-  React.useEffect(() => {
-    const needsUpdate =
-            history.location.search !== prevQueryParamRef.current
-        const alreadyUpdated =
-            history.location.search === queryParam
-        if (needsUpdate && !alreadyUpdated) {
-            console.log(
-                'Search or Filter Params Have Changed, Reseting Compound Table'
-            )
-            setData({
-                data: [],
-                queryParam: this.props.history.location.search,
-                totalDataLength: undefined,
-                start: 1,
-            })
-            updatecompoundNumberSearchInput()
+  const compoundNumberSearchLimit = 250
+
+  const clearAndCloseMultiSelection = () => {
+        if (selectedCompoundStore && selectedCompoundStore.isMultiSelectView) {
+            toggleMultiSelectView()
         }
-    prevQueryParamRef.current = queryParam;
-  }, [history, columnsConfigStore, isSimilarityView, compoundInfoForSimilarityView, selectedCompoundStore, userInfoStore, title, compoundsColumnsConfigStore, data, queryParam, totalDataLength]);
+    };
+
+  React.useEffect(() => {
+        if (columnsConfigStore) {
+            setAccessors(columnsConfigStore.accessors || [])
+            setColumns(columnsConfigStore.columnsConfig || [])
+        }
+  }, [columnsConfigStore]);
+
+  React.useEffect(() => {
+        return () => {
+            clearAndCloseMultiSelection()
+        };
+  }, []);
+
+  const isFirstRender = React.useRef(true);
+  React.useEffect(() => {
+        if (isFirstRender.current) {
+            isFirstRender.current = false
+            return
+        }
+        setData([])
+        setTotalDataLength(undefined)
+        updatecompoundNumberSearchInput()
+  }, [location.search]);
 
   const updatecompoundNumberSearchInput = () => {
         const { searchMap } = getSearchAndFilterCriteria()
@@ -108,20 +100,18 @@ function AllCompoundsContainer({history, columnsConfigStore, isSimilarityView, c
     };
 
   const getSearchAndFilterCriteria = () => {
-        const queryString = history.location.search
-            ? decodeURI(history.location.search.slice(1))
+        const queryString = locationRef.current.search
+            ? decodeURI(locationRef.current.search.slice(1))
             : ''
         const parameters = queryString.split('&')
 
         const filterMap = {}
         const searchMap = {}
         const rangeMap = {}
-
         const sizeCodeMap = {}
 
         parameters.forEach((parameter) => {
             if (parameter.includes('filter=')) {
-                //will be an array [<group>,<filter>]
                 const filterArr = parameter.replace('filter=', '').split(',')
                 const group = filterArr[0]
                 const filter = decodeURIComponent(filterArr[1])
@@ -134,18 +124,15 @@ function AllCompoundsContainer({history, columnsConfigStore, isSimilarityView, c
                     if (!sizeCodeMap[group]) {
                         sizeCodeMap[group] = []
                     }
-
                     sizeCodeMap[group].push(filter)
                 } else if (group !== 'sizeSubCode') {
                     if (!filterMap[group]) {
                         filterMap[group] = []
                     }
-
                     filterMap[group].push(filter)
                 }
             }
             if (parameter.includes('search=')) {
-                //will be an array [<group>,<searchValue>]
                 const searchArr = parameter.replace('search=', '').split(',')
                 const group = searchArr[0]
                 const searchValue = decodeURIComponent(searchArr[1])
@@ -170,14 +157,10 @@ function AllCompoundsContainer({history, columnsConfigStore, isSimilarityView, c
                 : combined
         }
 
-        return {
-            filterMap,
-            searchMap,
-            rangeMap,
-        }
+        return { filterMap, searchMap, rangeMap }
     };
 
-  const getComparison = (accessor, filterOptions) => {
+  const getComparison = (accessor, opts) => {
         if (accessor === 'sizeCode') {
             return (a, b) =>
                 numericCompare(
@@ -191,11 +174,10 @@ function AllCompoundsContainer({history, columnsConfigStore, isSimilarityView, c
                     complexityCodeOrder.indexOf(b)
                 )
         }
-
         return (a, b) =>
             numericCompare(
-                filterOptions[accessor][a],
-                filterOptions[accessor][b]
+                opts[accessor][a],
+                opts[accessor][b]
             )
     };
 
@@ -207,8 +189,8 @@ function AllCompoundsContainer({history, columnsConfigStore, isSimilarityView, c
         return [...new Set(compoundNumbersToBeSearched)]
     };
 
-  const getCSVHeaders = (data) => {
-        if (!data.length) {
+  const getCSVHeaders = (tableData) => {
+        if (!tableData.length) {
             return []
         }
 
@@ -216,28 +198,21 @@ function AllCompoundsContainer({history, columnsConfigStore, isSimilarityView, c
             ? similarityColumns
             : compoundsColumns
 
-        const accessors = Array.from(defaultColumnConfig.keys()).filter(
+        const visibleAccessors = Array.from(defaultColumnConfig.keys()).filter(
             (name) => defaultColumnConfig.get(name).visible
         )
 
-        return accessors.map((accessor) => {
-            const label = columns.get(accessor).title
-            return {
-                key: accessor,
-                label,
-            }
+        return visibleAccessors.map((accessor) => {
+            const col = columns.get ? columns.get(accessor) : null
+            const label = col ? col.title : accessor
+            return { key: accessor, label }
         })
     };
 
   const getCompoundsRequestBody = (start, compoundRequestLimit = 25) => {
-        const {
-            filterMap,
-            searchMap,
-            rangeMap,
-        } = getSearchAndFilterCriteria()
+        const { filterMap, searchMap, rangeMap } = getSearchAndFilterCriteria()
 
         if (searchMap.compoundNumber) {
-            //multi compound search can be split by whitespace, comma, or semi-colon
             const compoundNumbersToBeSearchedArray = getCleanedcompoundNumberSearchArray(
                 searchMap.compoundNumber
             )
@@ -265,13 +240,10 @@ function AllCompoundsContainer({history, columnsConfigStore, isSimilarityView, c
         }
 
         if (sort.name) {
-            const sort = {
-                [sort.name]: sort.ascending
-                    ? 'ascending'
-                    : 'descending',
+            const sortBody = {
+                [sort.name]: sort.ascending ? 'ascending' : 'descending',
             }
-
-            body = { ...body, sort }
+            body = { ...body, sort: sortBody }
         }
 
         return body
@@ -298,71 +270,7 @@ function AllCompoundsContainer({history, columnsConfigStore, isSimilarityView, c
         return apiService.post('compounds', reqBody)
     };
 
-  const retrieveData = (start = 1) => {
-        setLoading(true)
-
-        const queryString = history.location.search
-        const res = await compoundsRequest(start)
-
-        if (typeof res !== 'object') {
-            throw new Error('Network Error: Please check your connection.')
-        }
-
-        if (res.results.length === 0) {
-            let newState = { loading: false }
-
-            if (data.length === 0) {
-                newState = {
-                    ...newState,
-                    totalDataLength: 0,
-                    data: [],
-                }
-            }
-
-            this.setState(newState)
-
-            return
-        }
-
-        const isCurrentQueryUpToDate =
-            queryString === history.location.search
-
-        if (isCurrentQueryUpToDate) {
-            if (start === 1) {
-                //first request for a particular filter (data.length+1 === 1)
-                const filterOptions = await getFilterOptions()
-                const wasSortInstantiated = !!sort.name
-
-                this.setState({
-                    totalDataLength: res.count,
-                    data: res.results,
-                    filterOptions: filterOptions,
-                    filterRanges: res.ranges,
-                    loading: false,
-                    sort: {
-                        name: wasSortInstantiated
-                            ? sort.name
-                            : accessors[0],
-                        ascending: wasSortInstantiated
-                            ? sort.ascending
-                            : true,
-                    },
-                })
-            } else {
-                this.setState({
-                    data: data.concat(res.results),
-                    loading: false,
-                })
-            }
-
-            setDataMap(new Map([
-                    ...dataMap.entries(),
-                    ...res.results.map((row) => [row.compoundNumber, row]),
-                ]))
-        }
-    };
-
-  const getFilterOptions = () => {
+  const getFilterOptions = async () => {
         const res = await apiService.get('compoundsMetadata')
 
         if (typeof res !== 'object') {
@@ -370,47 +278,79 @@ function AllCompoundsContainer({history, columnsConfigStore, isSimilarityView, c
         }
 
         const filterMap = {}
-
         res.forEach((datum) => {
             if (!filterMap[datum.grouping]) {
                 filterMap[datum.grouping] = {}
             }
-
             filterMap[datum.grouping][datum.name] = datum.total
         })
 
         return filterMap
     };
 
-  const clearFilters = () => {
-        document
-            .getElementsByClassName('compounds-search-input')
-            .forEach((node) => (node.value = ''))
+  const retrieveData = async (start = 1) => {
+        setLoading(true)
+        const queryStringAtStart = locationRef.current.search
+        const res = await compoundsRequest(start)
 
-        history.push(`${history.location.pathname}`, {
-            ...history.location.state,
-        })
+        if (typeof res !== 'object') {
+            throw new Error('Network Error: Please check your connection.')
+        }
+
+        if (res.results.length === 0) {
+            setLoading(false)
+            if (data.length === 0) {
+                setTotalDataLength(0)
+                setData([])
+            }
+            return
+        }
+
+        const isCurrentQueryUpToDate = queryStringAtStart === locationRef.current.search
+
+        if (isCurrentQueryUpToDate) {
+            if (start === 1) {
+                const newFilterOptions = await getFilterOptions()
+                const wasSortInstantiated = !!sort.name
+                setTotalDataLength(res.count)
+                setData(res.results)
+                setFilterOptions(newFilterOptions)
+                setFilterRanges(res.ranges)
+                setLoading(false)
+                setSort({
+                    name: wasSortInstantiated ? sort.name : accessors[0],
+                    ascending: wasSortInstantiated ? sort.ascending : true,
+                })
+            } else {
+                setData(prev => [...prev, ...res.results])
+                setLoading(false)
+            }
+            setDataMap(prev => new Map([
+                ...prev.entries(),
+                ...res.results.map((row) => [row.compoundNumber, row]),
+            ]))
+        }
     };
 
-  const getPermittedAcessors = (accessors) => {
-        const isCompoundMetadataInstantiated = !!Object.keys(
-            filterOptions
-        ).length
+  const clearFilters = () => {
+        Array.from(document.getElementsByClassName('compounds-search-input'))
+            .forEach((node) => (node.value = ''))
+        navigate(locationRef.current.pathname, { state: { ...locationRef.current.state } })
+    };
+
+  const getPermittedAcessors = (accs) => {
+        const isCompoundMetadataInstantiated = !!Object.keys(filterOptions).length
         if (!isCompoundMetadataInstantiated) {
             return []
         }
 
-        const financePermission = !!userInfoStore.userInfo
-            .finance_permission
-        return accessors.filter((accessor) => {
-            const isFinanceAccessor = columnsConfigStore.columnsConfig.get(
-                accessor
-            ).financeAccessor
-            if (isFinanceAccessor) {
-                return financePermission
-            } else {
-                return true
-            }
+        const financePermission = !!(userInfoStore && userInfoStore.userInfo && userInfoStore.userInfo.finance_permission)
+        return accs.filter((accessor) => {
+            const colConfig = columnsConfigStore && columnsConfigStore.columnsConfig.get
+                ? columnsConfigStore.columnsConfig.get(accessor)
+                : null
+            const isFinanceAccessor = colConfig ? colConfig.financeAccessor : false
+            return isFinanceAccessor ? financePermission : true
         })
     };
 
@@ -428,8 +368,8 @@ function AllCompoundsContainer({history, columnsConfigStore, isSimilarityView, c
 
         const { filterMap } = getSearchAndFilterCriteria()
 
-        let currentQueryStringArr = history.location.search
-            ? decodeURI(history.location.search.slice(1)).split('&')
+        let currentQueryStringArr = locationRef.current.search
+            ? decodeURI(locationRef.current.search.slice(1)).split('&')
             : []
 
         currentQueryStringArr = currentQueryStringArr.map((query) => {
@@ -443,11 +383,9 @@ function AllCompoundsContainer({history, columnsConfigStore, isSimilarityView, c
                     const filterGroupQuery = filterMap[group]
                         .filter((value) => value !== update)
                         .map((value) => `filter=sizeCode,${value}`)
-
                     return filterGroupQuery.join('&')
                 }
             }
-
             return query
         })
 
@@ -482,64 +420,34 @@ function AllCompoundsContainer({history, columnsConfigStore, isSimilarityView, c
         return encodeURI(`?${currentQueryStringArr.join('&')}`)
     };
 
-  const updateFilterRange = (
-        values,
-        grouping,
-        remove = false,
-        clearAll = false
-    ) => {
-        const queryString = getUpdatedQueryString(
-            values,
-            grouping,
-            'range',
-            remove,
-            clearAll
-        )
-        history.push(
-            `${history.location.pathname}${queryString}`,
-            { ...history.location.state }
+  const updateFilterRange = (values, grouping, remove = false, clearAll = false) => {
+        const queryString = getUpdatedQueryString(values, grouping, 'range', remove, clearAll)
+        navigate(
+            `${locationRef.current.pathname}${queryString}`,
+            { state: { ...locationRef.current.state } }
         )
     };
 
-  updateSearch = _.debounce(
-        (
-            value = '',
-            grouping = '',
-            clearAll = false,
-            clearFilterTypeBeforeUpdate = ''
-        ) => {
-            const queryString = this.getUpdatedQueryString(
-                value,
-                grouping,
-                'search',
-                false,
-                clearAll,
-                clearFilterTypeBeforeUpdate
-            )
-            history.push(
-                `${history.location.pathname}${queryString}`,
-                { ...history.location.state }
-            )
-        },
-        500
-    )
-
-  const updateFilter = (
-        filter = '',
+  const updateSearch = _.debounce((
+        value = '',
         grouping = '',
-        remove = false,
-        clearAll = false
+        clearAll = false,
+        clearFilterTypeBeforeUpdate = ''
     ) => {
         const queryString = getUpdatedQueryString(
-            filter,
-            grouping,
-            'filter',
-            remove,
-            clearAll
+            value, grouping, 'search', false, clearAll, clearFilterTypeBeforeUpdate
         )
-        history.push(
-            `${history.location.pathname}${queryString}`,
-            { ...history.location.state }
+        navigate(
+            `${locationRef.current.pathname}${queryString}`,
+            { state: { ...locationRef.current.state } }
+        )
+    }, 500)
+
+  const updateFilter = (filter = '', grouping = '', remove = false, clearAll = false) => {
+        const queryString = getUpdatedQueryString(filter, grouping, 'filter', remove, clearAll)
+        navigate(
+            `${locationRef.current.pathname}${queryString}`,
+            { state: { ...locationRef.current.state } }
         )
     };
 
@@ -549,36 +457,20 @@ function AllCompoundsContainer({history, columnsConfigStore, isSimilarityView, c
             ascendingUpdateValue = isAscending
         } else {
             const isAccessorSortBeingToggled = accessor === sort.name
-            ascendingUpdateValue = isAccessorSortBeingToggled
-                ? !sort.ascending
-                : true
+            ascendingUpdateValue = isAccessorSortBeingToggled ? !sort.ascending : true
         }
-
-        const sort = {
-            name: accessor,
-            ascending: ascendingUpdateValue,
-        }
-
-        this.setState({
-            sort: sort,
-            data: [],
-            totalDataLength: undefined,
-            start: 1,
-        })
+        setSort({ name: accessor, ascending: ascendingUpdateValue })
+        setData([])
+        setTotalDataLength(undefined)
     };
 
-  const getcompoundNumbersNotFound = (searchValue, data) => {
+  const getcompoundNumbersNotFound = (searchValue, tableData) => {
         if (!searchValue) {
             return []
         }
-        const searchValuesArray = getCleanedcompoundNumberSearchArray(
-            searchValue
-        )
-        const compoundNumbersReturned = data.map(
-            (partObj) => partObj.compoundNumberClean
-        )
+        const searchValuesArray = getCleanedcompoundNumberSearchArray(searchValue)
+        const compoundNumbersReturned = tableData.map((partObj) => partObj.compoundNumberClean)
 
-        //if only one search value, compoundNumber has trailing wildcard
         if (searchValuesArray.length <= 1 && compoundNumbersReturned.length > 0) {
             return []
         }
@@ -592,16 +484,9 @@ function AllCompoundsContainer({history, columnsConfigStore, isSimilarityView, c
 
   const rendercompoundNumbersNotFound = (underCompoundsHeader = false) => {
         const { searchMap } = getSearchAndFilterCriteria()
-        const compoundNumbersNotFound = getcompoundNumbersNotFound(
-            searchMap.compoundNumber,
-            data
-        )
+        const compoundNumbersNotFound = getcompoundNumbersNotFound(searchMap.compoundNumber, data)
 
-        if (
-            !searchMap.compoundNumber ||
-            !compoundNumbersNotFound.length ||
-            loading
-        ) {
+        if (!searchMap.compoundNumber || !compoundNumbersNotFound.length || loading) {
             return
         }
 
@@ -614,94 +499,62 @@ function AllCompoundsContainer({history, columnsConfigStore, isSimilarityView, c
 
         return (
             <div className={classNamesArray.join(' ')}>
-                {`Compound ${
-                    compoundNumbersNotFound.length > 1 ? 'Numbers' : 'Number'
-                } Not Found: `}
-                {getcompoundNumbersNotFound(
-                    getSearchAndFilterCriteria().searchMap.compoundNumber,
-                    data
-                ).join(', ')}
+                {`Compound ${compoundNumbersNotFound.length > 1 ? 'Numbers' : 'Number'} Not Found: `}
+                {compoundNumbersNotFound.join(', ')}
             </div>
         )
     };
 
   const clearSelectedCompounds = () => {
-        selectedCompoundStore.setSelectedcompoundNumbers([])
+        if (selectedCompoundStore) {
+            selectedCompoundStore.setSelectedcompoundNumbers([])
+        }
     };
 
   const toggleMultiSelectView = () => {
-        if (selectedCompoundStore.isMultiSelectView) {
-            clearSelectedCompounds()
-        }
-        selectedCompoundStore.toggleMultiSelectView()
-    };
-
-  const clearAndCloseMultiSelection = () => {
-        if (selectedCompoundStore.isMultiSelectView) {
-            toggleMultiSelectView()
+        if (selectedCompoundStore) {
+            if (selectedCompoundStore.isMultiSelectView) {
+                clearSelectedCompounds()
+            }
+            selectedCompoundStore.toggleMultiSelectView()
         }
     };
-
-  compoundNumberSearchLimit = 250
 
   const getScrollParent = () => {
-        return scrollParentRef
+        return scrollParentRef.current
     };
 
-  const areFiltersApplied = !!history.location.search.length
-        const {
-            filterMap,
-            rangeMap,
-            searchMap,
-        } = getSearchAndFilterCriteria()
+  const areFiltersApplied = !!location.search.length
+        const { filterMap, rangeMap, searchMap } = getSearchAndFilterCriteria()
         return (
             <Fragment>
-                {isSimilarityView &&
-                    isCompareCompoundToLibraryModalInView && (
-                        <CompareToLibraryModal
-                            compoundInfo={compoundInfoForSimilarityView}
-                            comparison="Similar Results"
-                            close={() =>
-                                setIsCompareCompoundToLibraryModalInView(false)
-                            }
-                            isSimilar={isSimilarityView}
-                        />
-                    )}
+                {isSimilarityView && isCompareCompoundToLibraryModalInView && (
+                    <CompareToLibraryModal
+                        compoundInfo={compoundInfoForSimilarityView}
+                        comparison="Similar Results"
+                        close={() => setIsCompareCompoundToLibraryModalInView(false)}
+                        isSimilar={isSimilarityView}
+                    />
+                )}
                 <div className="DataTable padding-top-nav-breadcrumb">
                     <div className="TableCaptionBar flex align-center space-between h2 letter-spacing">
                         <div
                             className="flex align-center"
-                            style={
-                                isGridView
-                                    ? { paddingLeft: '2rem' }
-                                    : {}
-                            }
+                            style={isGridView ? { paddingLeft: '2rem' } : {}}
                         >
                             <div>
-                                <div className="h0 semi-bold">{`${
-                                    title || 'Compounds'
-                                }`}</div>
-                                {selectedCompoundStore
-                                    .isMultiSelectView &&
-                                    !!selectedCompoundStore
-                                        .selectedcompoundNumbers.length && (
-                                        <div className="compounds-selected-caption h7 semi-thin">{`${selectedCompoundStore.selectedcompoundNumbers.length} Selected`}</div>
+                                <div className="h0 semi-bold">{`${title || 'Compounds'}`}</div>
+                                {selectedCompoundStore && selectedCompoundStore.isMultiSelectView &&
+                                    !!selectedCompoundStore.selectedcompoundNumbers.length && (
+                                        <div className="compounds-selected-caption h7 semi-thin">
+                                            {`${selectedCompoundStore.selectedcompoundNumbers.length} Selected`}
+                                        </div>
                                     )}
                                 {!isSimilarityView && (
-                                    <div
-                                        className="h5 semi-thin"
-                                        style={{ paddingTop: '0.25rem' }}
-                                    >
+                                    <div className="h5 semi-thin" style={{ paddingTop: '0.25rem' }}>
                                         {totalDataLength
-                                            ? `${totalDataLength} ${
-                                                  totalDataLength ===
-                                                  1
-                                                      ? 'Result'
-                                                      : 'Results'
-                                              }`
-                                            : rendercompoundNumbersNotFound(
-                                                  true
-                                              )}
+                                            ? `${totalDataLength} ${totalDataLength === 1 ? 'Result' : 'Results'}`
+                                            : rendercompoundNumbersNotFound(true)}
                                     </div>
                                 )}
                             </div>
@@ -721,20 +574,16 @@ function AllCompoundsContainer({history, columnsConfigStore, isSimilarityView, c
                                 >
                                     <div
                                         className="h6-5 semi-bold pointer"
-                                        style={{
-                                            paddingLeft: '1rem',
-                                            color: '#ef88b8',
-                                        }}
+                                        style={{ paddingLeft: '1rem', color: '#ef88b8' }}
                                         onClick={() =>
-                                            gridViewComponent.current.toggleGridFilterControls()
+                                            gridViewComponent.current && gridViewComponent.current.toggleGridFilterControls()
                                         }
                                     >
                                         FILTERS APPLIED
                                     </div>
                                 </Tooltip>
                             )}
-                            {totalDataLength &&
-                            totalDataLength > 0
+                            {totalDataLength && totalDataLength > 0
                                 ? rendercompoundNumbersNotFound(false)
                                 : null}
                         </div>
@@ -751,65 +600,42 @@ function AllCompoundsContainer({history, columnsConfigStore, isSimilarityView, c
                             )}
                             <div className="TableCaptionBarButtonContainer flex align-center justify-end">
                                 <ToggleSwitch
-                                    checked={
-                                        selectedCompoundStore
-                                            .isMultiSelectView
-                                    }
+                                    checked={selectedCompoundStore && selectedCompoundStore.isMultiSelectView}
                                     toggle={toggleMultiSelectView}
                                 />
                                 <button
                                     className="TableCaptionBarButton h6 pointer flex align-center"
-                                    onClick={() =>
-                                        setIsGridView(!isGridView)
-                                    }
+                                    onClick={() => setIsGridView(!isGridView)}
                                 >
-                                    {isGridView
-                                        ? 'Table View'
-                                        : 'Grid View'}
+                                    {isGridView ? 'Table View' : 'Grid View'}
                                     <Icon
-                                        style={{
-                                            marginRight: '-0.25rem',
-                                            paddingLeft: '0.5rem',
-                                        }}
+                                        style={{ marginRight: '-0.25rem', paddingLeft: '0.5rem' }}
                                         icon={ic_autorenew}
                                         size={16}
                                     />
                                 </button>
                                 <Opportunity
-                                    totalDataLength={
-                                        totalDataLength || 0
-                                    }
+                                    totalDataLength={totalDataLength || 0}
                                     dataRequest={
-                                        selectedCompoundStore
-                                            .isMultiSelectView
+                                        selectedCompoundStore && selectedCompoundStore.isMultiSelectView
                                             ? multiCompoundSelectionViewExportCompoundRequest
                                             : compoundsRequest
                                     }
                                 />
                                 <Compare
                                     data={dataMap}
-                                    selectedCompounds={
-                                        selectedCompoundStore
-                                            .selectedcompoundNumbers
-                                    }
-                                    showing={
-                                        selectedCompoundStore
-                                            .isMultiSelectView
-                                    }
+                                    selectedCompounds={selectedCompoundStore && selectedCompoundStore.selectedcompoundNumbers}
+                                    showing={selectedCompoundStore && selectedCompoundStore.isMultiSelectView}
                                 />
                                 <CSVExport
                                     exportType="compounds"
                                     exportLimit={5000}
                                     totalDataLength={
-                                        selectedCompoundStore
-                                            .isMultiSelectView
-                                            ? selectedCompoundStore
-                                                  .selectedcompoundNumbers.length
+                                        selectedCompoundStore && selectedCompoundStore.isMultiSelectView
+                                            ? selectedCompoundStore.selectedcompoundNumbers.length
                                             : totalDataLength
                                     }
-                                    headers={getCSVHeaders(
-                                        data
-                                    )}
+                                    headers={getCSVHeaders(data)}
                                     classNamesArray={[
                                         'TableCaptionBarButton',
                                         'h6',
@@ -818,120 +644,71 @@ function AllCompoundsContainer({history, columnsConfigStore, isSimilarityView, c
                                         'align-center',
                                     ]}
                                     dataRequest={
-                                        selectedCompoundStore
-                                            .isMultiSelectView
+                                        selectedCompoundStore && selectedCompoundStore.isMultiSelectView
                                             ? multiCompoundSelectionViewExportCompoundRequest
                                             : compoundsRequest
                                     }
                                 />
-                                {isSimilarityView &&
-                                    !selectedCompoundStore
-                                        .isMultiSelectView && (
-                                        <button
-                                            className="TableCaptionBarButton h6 pointer"
-                                            onClick={() =>
-                                                setIsCompareCompoundToLibraryModalInView(true)
-                                            }
-                                        >
-                                            Compare Compound to Results
-                                        </button>
-                                    )}
+                                {isSimilarityView && selectedCompoundStore && !selectedCompoundStore.isMultiSelectView && (
+                                    <button
+                                        className="TableCaptionBarButton h6 pointer"
+                                        onClick={() => setIsCompareCompoundToLibraryModalInView(true)}
+                                    >
+                                        Compare Compound to Results
+                                    </button>
+                                )}
                                 {isGridView && (
                                     <CompoundsGridSortDropdown
-                                        options={getPermittedAcessors(
-                                            accessors
-                                        )}
+                                        options={getPermittedAcessors(accessors)}
                                         sort={sort}
                                         updateSort={updateSort}
                                         style={
-                                            !getPermittedAcessors(
-                                                accessors
-                                            ).length
-                                                ? {
-                                                      opacity: 0.5,
-                                                      pointerEvents: 'none',
-                                                  }
+                                            !getPermittedAcessors(accessors).length
+                                                ? { opacity: 0.5, pointerEvents: 'none' }
                                                 : {}
                                         }
                                     />
                                 )}
-
                                 {isSimilarityView && (
-                                    <label
-                                        htmlFor="limit_results"
-                                        className="slider-container results"
-                                    >
+                                    <label htmlFor="limit_results" className="slider-container results">
                                         <span className="slider-label nowrap">
                                             Quantity of Results
-                                            <Information
-                                                header="Quantity of Results"
-                                                eventName="showQuantityOfResults"
-                                                popOut={true}
-                                            >
+                                            <Information header="Quantity of Results" popOut={true}>
                                                 <div className="quantity-of-results-description-body h6 semi-thin wrap-normal">
-                                                    {quantityOfResultsDescription(
-                                                        true
-                                                    )}
+                                                    {quantityOfResultsDescription(true)}
                                                 </div>
                                             </Information>
                                         </span>
-                                        <span className="slider-sublabel">
-                                            Less
-                                        </span>
+                                        <span className="slider-sublabel">Less</span>
                                         <Slider
-                                            values={[
-                                                25,
-                                                50,
-                                                100,
-                                                200,
-                                                500,
-                                                MAX_RESULTS,
-                                            ]}
-                                            changed={(value) =>
-                                                setData({
-                                                    n_compounds: value,
-                                                    data: [],
-                                                    totalDataLength: undefined,
-                                                    start: 1,
-                                                })
-                                            }
+                                            values={[25, 50, 100, 200, 500, MAX_RESULTS]}
+                                            changed={(value) => {
+                                                setN_compounds(value)
+                                                setData([])
+                                                setTotalDataLength(undefined)
+                                            }}
                                             id="limit_results"
                                             width="10rem"
                                         />
-                                        <span className="slider-sublabel">
-                                            More
-                                        </span>
+                                        <span className="slider-sublabel">More</span>
                                     </label>
                                 )}
                             </div>
                         </div>
                     </div>
-                    {!!getPermittedAcessors(accessors).length &&
-                        !isGridView && (
-                            <ColumnConfig
-                                columnsConfigStore={
-                                    columnsConfigStore
-                                }
-                                isSimilarityView={isSimilarityView}
-                                savedColumnConfig={
-                                    isSimilarityView
-                                        ? userInfoStore.userInfo
-                                              .similarity_column_config
-                                        : userInfoStore.userInfo
-                                              .column_config
-                                }
-                                userId={userInfoStore.userInfo.id}
-                            />
-                        )}
-                    <div
-                        className="ScrollContainer"
-                        ref={(ref) => {
-                            if (!ref) {
-                                return
+                    {!!getPermittedAcessors(accessors).length && !isGridView && (
+                        <ColumnConfig
+                            columnsConfigStore={columnsConfigStore}
+                            isSimilarityView={isSimilarityView}
+                            savedColumnConfig={
+                                isSimilarityView
+                                    ? userInfoStore && userInfoStore.userInfo && userInfoStore.userInfo.similarity_column_config
+                                    : userInfoStore && userInfoStore.userInfo && userInfoStore.userInfo.column_config
                             }
-                            return (scrollParentRef = ref)
-                        }}
-                    >
+                            userId={userInfoStore && userInfoStore.userInfo && userInfoStore.userInfo.id}
+                        />
+                    )}
+                    <div className="ScrollContainer" ref={scrollParentRef}>
                         {isGridView ? (
                             <div className="Grid">
                                 <CompoundsGridContainer
@@ -940,42 +717,30 @@ function AllCompoundsContainer({history, columnsConfigStore, isSimilarityView, c
                                     retrieveData={retrieveData}
                                     getScrollParent={getScrollParent}
                                     totalDataLength={totalDataLength}
-                                    isSimilarityView={
-                                        isSimilarityView
-                                    }
-                                    accessors={getPermittedAcessors(
-                                        accessors
-                                    )}
+                                    isSimilarityView={isSimilarityView}
+                                    accessors={getPermittedAcessors(accessors)}
                                     sort={sort}
                                     updateSort={updateSort}
                                     filterOptions={filterOptions}
                                     filterRanges={filterRanges}
-                                    getSearchAndFilterCriteria={
-                                        getSearchAndFilterCriteria
-                                    }
+                                    getSearchAndFilterCriteria={getSearchAndFilterCriteria}
                                     updateSearch={updateSearch}
                                     updateFilter={updateFilter}
                                     updateFilterRange={updateFilterRange}
-                                    compoundNumberSearchLimit={
-                                        compoundNumberSearchLimit
-                                    }
+                                    compoundNumberSearchLimit={compoundNumberSearchLimit}
                                 />
                             </div>
                         ) : (
                             <CompoundsTableContainer
                                 data={data}
-                                accessors={getPermittedAcessors(
-                                    accessors
-                                )}
+                                accessors={getPermittedAcessors(accessors)}
                                 retrieveData={retrieveData}
                                 sort={sort}
                                 updateSort={updateSort}
                                 filterOptions={filterOptions}
                                 comparisonMethod={getComparison}
                                 filterRanges={filterRanges}
-                                getSearchAndFilterCriteria={
-                                    getSearchAndFilterCriteria
-                                }
+                                getSearchAndFilterCriteria={getSearchAndFilterCriteria}
                                 updateSearch={updateSearch}
                                 updateFilter={updateFilter}
                                 updateFilterRange={updateFilterRange}
@@ -983,9 +748,7 @@ function AllCompoundsContainer({history, columnsConfigStore, isSimilarityView, c
                                 isLoading={loading}
                                 getScrollParent={getScrollParent}
                                 totalDataLength={totalDataLength}
-                                compoundNumberSearchLimit={
-                                    compoundNumberSearchLimit
-                                }
+                                compoundNumberSearchLimit={compoundNumberSearchLimit}
                             />
                         )}
                     </div>
@@ -994,10 +757,4 @@ function AllCompoundsContainer({history, columnsConfigStore, isSimilarityView, c
         );
 }
 
-export default withRouter(
-    inject(
-        'userInfoStore',
-        'selectedCompoundStore',
-        'compoundsColumnsConfigStore'
-    )(observer(AllCompoundsContainer))
-)
+export default AllCompoundsContainer
