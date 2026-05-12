@@ -1,4 +1,4 @@
-import React, { Component, Fragment } from 'react'
+import React, { Fragment } from 'react'
 import './admin.css'
 
 import { AdminModalShell } from '..'
@@ -21,21 +21,58 @@ function AddUserModal({closeModal}) {
   const [addNewUserError, setAddNewUserError] = React.useState('');
 
   const clearCurrentBems = () => {
-        this.setState({
-            AppSSO: '',
-            AppSSOUserInfo: {},
-            selectedRole: undefined,
-            privilegedAccess: false,
-            AppSSORequestError: false,
-            addNewUserError: ''
-        })
+        setAppSSO('');
+        setAppSSOUserInfo({});
+        setSelectedRole(undefined);
+        setPrivilegedAccess(false);
+        setAppSSORequestError(false);
+        setAddNewUserError('');
     };
 
   const togglePrivilegedAccess = () => {
-        this.setState({
-            privilegedAccess: !privilegedAccess,
-            addNewUserError: ''
-        })
+        setPrivilegedAccess(prev => !prev);
+        setAddNewUserError('');
+    };
+
+  const selectRole = (role) => {
+        setSelectedRole(role);
+        setAddNewUserError('');
+    };
+
+  const getAppSSOUserInfo = async (bemsId) => {
+        if (isInvalidBems(bemsId)) {
+            setAppSSORequestError(true);
+            return;
+        }
+        try {
+            const userInfo = await apiService.get('WebSSOUserInfo', bemsId);
+            if (!userInfo) {
+                setAppSSORequestError(true);
+            } else {
+                setAppSSOUserInfo(userInfo);
+                setAppSSORequestError(false);
+            }
+        } catch (err) {
+            setAppSSORequestError(true);
+        }
+    };
+
+  const submitNewUser = async (AppSSOId) => {
+        try {
+            const name = `${getAppSSOInfoValue(AppSSOUserInfo, 'firstName')} ${getAppSSOInfoValue(AppSSOUserInfo, 'lastName')}`;
+            const email = getAppSSOInfoValue(AppSSOUserInfo, 'emailAddress');
+            const privileged_permission = selectedRole !== 'GUEST' ? privilegedAccess : false;
+            await apiService.post('createUser', {
+                webssoId: AppSSOId,
+                role: selectedRole,
+                name,
+                email,
+                privileged_permission,
+            });
+            closeModal();
+        } catch (err) {
+            setAddNewUserError(err.message || 'Failed to add user');
+        }
     };
 
   const renderHeader = () => {
@@ -55,12 +92,6 @@ function AddUserModal({closeModal}) {
         }
 
         return ''
-    }
-
-  function privilegedAccess() {
-        return selectedRole !== 'GUEST'
-            ? privilegedAccess
-            : false
     }
 
   function roleClassName() {
@@ -87,7 +118,7 @@ function AddUserModal({closeModal}) {
                             User: 'USER',
                             Administrator: 'ADMIN'
                         }}
-                        className={roleClassName}
+                        className={roleClassName()}
                         titleClassNamesArr={['h5', 'bold']}
                         selected={selectedRole}
                         update={selectRole}
@@ -95,10 +126,10 @@ function AddUserModal({closeModal}) {
                 </div>
                 <div className="user-modal-body-segment">
                     <AdminCheckbox
-                        className={privilegedPermissionClassName}
+                        className={privilegedPermissionClassName()}
                         header="Step 3 - Privileged Access"
                         label="Privileged Access"
-                        checked={privilegedAccess}
+                        checked={selectedRole !== 'GUEST' ? privilegedAccess : false}
                         onChange={togglePrivilegedAccess}
                         inputName="privileged_access_checkbox"
                     />
@@ -130,13 +161,11 @@ function AddUserModal({closeModal}) {
                             border: 'solid 1px #ccc'
                         }}
                         value={AppSSO}
-                        onChange={e =>
-                            this.setState({
-                                AppSSO: e.target.value,
-                                AppSSORequestError: false,
-                                addNewUserError: false
-                            })
-                        }
+                        onChange={e => {
+                            setAppSSO(e.target.value);
+                            setAppSSORequestError(false);
+                            setAddNewUserError('');
+                        }}
                         onKeyDown={e =>
                             handleKeyDown(e, () =>
                                 getAppSSOUserInfo(AppSSO)
@@ -212,20 +241,20 @@ function AddUserModal({closeModal}) {
         })
     };
 
-  const isHoldOnSubmission =
-            !AppSSOUserInfo.AppSSOId || !selectedRole
-        return (
-            <AdminModalShell
-                header={renderHeader()}
-                body={renderBody()}
-                submitModal={() =>
-                    submitNewUser(AppSSOUserInfo.AppSSOId)
-                }
-                closeModal={closeModal}
-                submitText={'Add User'}
-                isHoldOnSubmission={isHoldOnSubmission}
-            />
-        );
+  const isHoldOnSubmission = !AppSSOUserInfo.AppSSOId || !selectedRole;
+
+  return (
+        <AdminModalShell
+            header={renderHeader()}
+            body={renderBody()}
+            submitModal={() =>
+                submitNewUser(AppSSOUserInfo.AppSSOId)
+            }
+            closeModal={closeModal}
+            submitText={'Add User'}
+            isHoldOnSubmission={isHoldOnSubmission}
+        />
+    );
 }
 
 export default AddUserModal
