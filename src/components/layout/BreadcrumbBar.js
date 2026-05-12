@@ -1,19 +1,22 @@
 import React, { Fragment } from 'react'
-import { withRouter } from 'react-router-dom'
+import { useLocation, useNavigate } from 'react-router-dom'
 
 import { Icon } from 'react-icons-kit'
 import { ic_keyboard_arrow_right } from 'react-icons-kit/md/ic_keyboard_arrow_right'
 
-const BreadcrumbBar = ({ history }) => {
+const BreadcrumbBar = () => {
+    const location = useLocation();
+    const navigate = useNavigate();
+
     const pushBreadcrumbInfo = (breadcrumbsArray, title, path) => {
         breadcrumbsArray.push({ breadcrumb: title, path: path })
     }
 
     const pushBreadcrumbForCompoundsPath = breadcrumbsArray => {
         const allCompoundsURL =
-            history.location.state &&
-            history.location.state.returnToAllCompoundsViewURL
-                ? history.location.state.returnToAllCompoundsViewURL
+            location.state &&
+            location.state.returnToAllCompoundsViewURL
+                ? location.state.returnToAllCompoundsViewURL
                 : '/compounds'
         pushBreadcrumbInfo(breadcrumbsArray, 'Compounds', allCompoundsURL)
     }
@@ -28,16 +31,16 @@ const BreadcrumbBar = ({ history }) => {
 
     const pushBreadcrumbForSimilarCompoundPath = (breadcrumbsArray, compoundNumber) => {
         const similarCompoundsURL =
-            history.location.state &&
-            history.location.state.returnToSimilarCompoundsViewURL
-                ? history.location.state.returnToSimilarCompoundsViewURL
+            location.state &&
+            location.state.returnToSimilarCompoundsViewURL
+                ? location.state.returnToSimilarCompoundsViewURL
                 : `/similar/${compoundNumber}`
         pushBreadcrumbInfo(breadcrumbsArray, 'Similar Compounds', similarCompoundsURL)
     }
 
     const getBreadcrumbsInfo = () => {
         let breadcrumbs = [{ breadcrumb: 'Home', path: '/' }]
-        const pathPieces = history.location.pathname
+        const pathPieces = location.pathname
             .slice(1)
             .split('/')
             .filter(pathPiece => pathPiece !== '')
@@ -50,21 +53,21 @@ const BreadcrumbBar = ({ history }) => {
                 pushBreadcrumbForCompoundsPath(breadcrumbs)
             } else if (pathPieces[0] === 'compound') {
                 const isFirstLevelCompoundPresent =
-                    !!history.location.state &&
-                    history.location.state.firstLevelcompoundNumber
+                    !!location.state &&
+                    location.state.firstLevelcompoundNumber
                 if (
                     isFirstLevelCompoundPresent &&
-                    history.location.state.firstLevelcompoundNumber !==
+                    location.state.firstLevelcompoundNumber !==
                         pathPieces[1]
                 ) {
                     pushBreadcrumbForCompoundsPath(breadcrumbs)
                     pushBreadcrumbForSingleCompoundPath(
                         breadcrumbs,
-                        history.location.state.firstLevelcompoundNumber
+                        location.state.firstLevelcompoundNumber
                     )
                     pushBreadcrumbForSimilarCompoundPath(
                         breadcrumbs,
-                        history.location.state.firstLevelcompoundNumber
+                        location.state.firstLevelcompoundNumber
                     )
                     pushBreadcrumbForSingleCompoundPath(breadcrumbs, pathPieces[1])
                 } else {
@@ -98,8 +101,8 @@ const BreadcrumbBar = ({ history }) => {
                         <div
                             className="breadcrumb-link pointer"
                             onClick={() =>
-                                history.push(breadcrumbObj.path, {
-                                    ...history.location.state
+                                navigate(breadcrumbObj.path, {
+                                    state: { ...location.state }
                                 })
                             }
                         >
@@ -123,4 +126,4 @@ const BreadcrumbBar = ({ history }) => {
     )
 }
 
-export default withRouter(BreadcrumbBar)
+export default BreadcrumbBar

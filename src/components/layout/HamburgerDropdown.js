@@ -1,7 +1,9 @@
-import React, { Component } from 'react'
-import { withRouter } from 'react-router-dom'
+import React from 'react'
+import { useNavigate } from 'react-router-dom'
 
-function HamburgerDropdown({isAdmin, history}) {
+function HamburgerDropdown({isAdmin}) {
+  const navigate = useNavigate();
+
   const renderHamburgerDropdownLinks = () => {
         let links = [
             { title: 'Home', path: '/' },
@@ -17,7 +19,7 @@ function HamburgerDropdown({isAdmin, history}) {
                 <div
                     key={i}
                     className="hamburger-dropdown-link pointer"
-                    onClick={() => history.push(linkMap.path)}
+                    onClick={() => navigate(linkMap.path)}
                 >
                     {linkMap.title}
                 </div>
@@ -26,10 +28,10 @@ function HamburgerDropdown({isAdmin, history}) {
     };
 
   return (
-            <div className="hamburger-dropdown h4 letter-spacing">
-                {renderHamburgerDropdownLinks()}
-            </div>
-        );
+        <div className="hamburger-dropdown h4 letter-spacing">
+            {renderHamburgerDropdownLinks()}
+        </div>
+    );
 }
 
-export default withRouter(HamburgerDropdown)
+export default HamburgerDropdown
