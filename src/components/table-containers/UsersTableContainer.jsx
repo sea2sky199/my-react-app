@@ -1,15 +1,14 @@
 import React, { Fragment } from 'react'
-import {
-    InfiniteTable,
-    Cell,
-    UserEditModal,
-    AddUserModal,
-    DeleteUserModal,
-    FilteringRow,
-    CSVExport,
-    ClickableDiv,
-    ContactUsers
-} from '../../components'
+import AppIcon from '../utility-components/AppIcon'
+import InfiniteTable from '../table-utilities/InfiniteTable'
+import Cell from '../table-utilities/Cell'
+import FilteringRow from '../table-utilities/FilteringRow'
+import UserEditModal from '../admin/UserEditModal'
+import AddUserModal from '../admin/AddUserModal'
+import DeleteUserModal from '../admin/DeleteUserModal'
+import CSVExport from '../csv/CSVExport'
+import ClickableDiv from '../utility-components/ClickableDiv'
+import ContactUsers from '../admin/ContactUsers'
 import './table-container.css'
 
 import apiService from '../../data/ApiService'
@@ -23,7 +22,6 @@ import {
 
 import _ from 'lodash'
 
-import { Icon } from 'react-icons-kit'
 import { ic_add } from 'react-icons-kit/md/ic_add'
 import { ic_edit } from 'react-icons-kit/md/ic_edit'
 import { ic_delete } from 'react-icons-kit/md/ic_delete'
@@ -132,7 +130,7 @@ function UsersTableContainer({userInfoStore, title}) {
             <div className="cell-container flex align-center">
                 {!isSelf && (
                     <Fragment>
-                        <Icon
+                        <AppIcon
                             className="user-change-button pointer align-center justify-center"
                             style={{ display: 'flex' }}
                             icon={ic_edit}
@@ -142,7 +140,7 @@ function UsersTableContainer({userInfoStore, title}) {
                             tabIndex={0}
                             onKeyDown={e => handleKeyDown(e, openEditUserModal)}
                         />
-                        <Icon
+                        <AppIcon
                             className="user-change-button pointer align-center justify-center"
                             style={{ display: 'flex', marginLeft: '0.5rem' }}
                             icon={ic_delete}
@@ -399,7 +397,7 @@ function UsersTableContainer({userInfoStore, title}) {
                     <div className="flex align-center">
                         {toTitleCase(snakeToHumanCase(accessor))}
                         {isSorted && (
-                            <Icon
+                            <AppIcon
                                 icon={isAscending ? ic_keyboard_arrow_up : ic_keyboard_arrow_down}
                                 size={14}
                             />
@@ -467,7 +465,7 @@ function UsersTableContainer({userInfoStore, title}) {
                                     }
                                 >
                                     Add New User
-                                    <Icon
+                                    <AppIcon
                                         icon={ic_add}
                                         size={14}
                                         style={{

@@ -1,4 +1,5 @@
 import React, { Fragment } from 'react'
+import AppIcon from '../utility-components/AppIcon'
 import Information from '../information-modal/Information'
 import SizeCodeDescription from '../information-modal/SizeCodeDescription'
 import Cell from './Cell'
@@ -9,7 +10,6 @@ import {
     camelToHumanCase
 } from '../../utilities'
 
-import { Icon } from 'react-icons-kit'
 import { ic_keyboard_arrow_down } from 'react-icons-kit/md/ic_keyboard_arrow_down'
 import { ic_keyboard_arrow_up } from 'react-icons-kit/md/ic_keyboard_arrow_up'
 
@@ -43,7 +43,7 @@ const CompoundTableHeadingRow = ({
                     </Information>
                 )}
                 {accessor === activelySortedColumn && (
-                    <Icon
+                    <AppIcon
                         icon={
                             sort.ascending
                                 ? ic_keyboard_arrow_down

@@ -1,6 +1,6 @@
 import React from 'react'
 
-import { AdminModalShell } from '../../components'
+import AdminModalShell from '../modals/AdminModalShell'
 import { hasClass, contactEmail } from '../../utilities'
 import EmailService from '../../data/EmailService'
 

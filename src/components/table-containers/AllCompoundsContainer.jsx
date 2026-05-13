@@ -1,4 +1,5 @@
 import React, { Fragment } from 'react'
+import AppIcon from '../utility-components/AppIcon'
 import { useNavigate, useLocation } from 'react-router-dom'
 
 import CSVExport from '../csv/CSVExport'
@@ -12,7 +13,6 @@ import ToggleSwitch from '../utility-components/ToggleSwitch'
 import Tooltip from '../utility-components/Tooltip'
 import './table-container.css'
 
-import { Icon } from 'react-icons-kit'
 import { ic_autorenew } from 'react-icons-kit/md/ic_autorenew'
 
 import _ from 'lodash'
@@ -603,7 +603,7 @@ function AllCompoundsContainer({columnsConfigStore, isSimilarityView, compoundIn
                                     onClick={() => setIsGridView(!isGridView)}
                                 >
                                     {isGridView ? 'Table View' : 'Grid View'}
-                                    <Icon
+                                    <AppIcon
                                         style={{ marginRight: '-0.25rem', paddingLeft: '0.5rem' }}
                                         icon={ic_autorenew}
                                         size={16}

@@ -1,10 +1,11 @@
 import React from 'react'
+import AppIcon from '../utility-components/AppIcon'
 
-import { Icon } from 'react-icons-kit'
 import { ic_file_download } from 'react-icons-kit/md/ic_file_download'
 import { CSVLink } from 'react-csv'
 import { getChemDWProprietary } from '../../utilities'
-import { Tooltip, Spinner } from '../../components'
+import Tooltip from '../utility-components/Tooltip'
+import Spinner from '../loading-and-error-views/Spinner'
 
 function CSVExport({dataRequest, totalDataLength, exportLimit, headers, classNamesArray, exportType}) {
   const [loading, setLoading] = React.useState(false);
@@ -52,7 +53,7 @@ function CSVExport({dataRequest, totalDataLength, exportLimit, headers, classNam
                     className={classNamesArray.join(' ')}
                 >
                     Export
-                    <Icon
+                    <AppIcon
                         style={{
                             marginRight: '-0.25rem',
                             paddingLeft: '0.5rem'
@@ -80,7 +81,7 @@ function CSVExport({dataRequest, totalDataLength, exportLimit, headers, classNam
                 headers={headers}
             >
                 Export
-                <Icon
+                <AppIcon
                     style={{
                         marginRight: '-0.25rem',
                         paddingLeft: '0.5rem'
@@ -98,7 +99,7 @@ function CSVExport({dataRequest, totalDataLength, exportLimit, headers, classNam
                 {loading ? (
                     <Spinner size="15" style={{ margin: '0 -4px 0 5px' }} />
                 ) : (
-                    <Icon
+                    <AppIcon
                         style={{
                             marginRight: '-0.25rem',
                             paddingLeft: '0.5rem'

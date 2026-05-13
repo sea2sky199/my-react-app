@@ -1,9 +1,9 @@
 import React from 'react'
+import AppIcon from '../utility-components/AppIcon'
 
 import ClickableDiv from '../utility-components/ClickableDiv'
 import { handleKeyDown } from '../../utilities'
 
-import { Icon } from 'react-icons-kit'
 import { ic_search } from 'react-icons-kit/md/ic_search'
 import { ic_close } from 'react-icons-kit/md/ic_close'
 import './home.css'
@@ -48,7 +48,7 @@ function HomeSearch({reroute}) {
                             }
                         }}
                     />
-                    <Icon
+                    <AppIcon
                         className={
                             !!searchInput.length
                                 ? 'fadeOut'
@@ -58,7 +58,7 @@ function HomeSearch({reroute}) {
                         icon={ic_search}
                         size="26"
                     />
-                    <Icon
+                    <AppIcon
                         className={
                             !!searchInput.length
                                 ? 'pointer fadeIn'

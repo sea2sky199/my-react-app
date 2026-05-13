@@ -1,9 +1,9 @@
 import React, { Fragment } from 'react'
+import AppIcon from '../utility-components/AppIcon'
 
 import InformationModalShell from './InformationModalShell'
 import './information.css'
 
-import { Icon } from 'react-icons-kit'
 import { ic_info } from 'react-icons-kit/md/ic_info'
 
 function Information({popOut, buttonStyle, header, children}) {
@@ -32,7 +32,7 @@ function Information({popOut, buttonStyle, header, children}) {
                     style={buttonStyle}
                     ref={informativeButton}
                 >
-                    <Icon
+                    <AppIcon
                         onClick={showInformative}
                         icon={ic_info}
                         size={16}

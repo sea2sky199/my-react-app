@@ -1,6 +1,6 @@
 import React from 'react'
+import AppIcon from '../utility-components/AppIcon'
 import { Draggable } from 'react-beautiful-dnd'
-import { Icon } from 'react-icons-kit'
 import { ic_more_vert } from 'react-icons-kit/md/ic_more_vert'
 
 import { toTitleCase, titleCaseExemptValues, hasClass } from '../../utilities'
@@ -21,7 +21,7 @@ const CheckboxColumnItem = ({ items, update }) => {
                     key={`${i}-column-item-container`}
                     style={{backgroundColor: '#ffffff'}}
                 >
-                    <Icon icon={ic_more_vert} style={dragIconStyle} />
+                    <AppIcon icon={ic_more_vert} style={dragIconStyle} />
                     <label
                         htmlFor={name}
                         className='flex align-center disabled'
@@ -66,7 +66,7 @@ const CheckboxColumnItem = ({ items, update }) => {
                             style={dragIconStyle}
                             {...provided.dragHandleProps}
                         >
-                            <Icon 
+                            <AppIcon 
                                 icon={ic_more_vert}
                                 style={{pointerEvents: 'none'}}
                             />

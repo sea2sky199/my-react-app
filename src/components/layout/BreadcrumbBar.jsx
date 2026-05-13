@@ -1,7 +1,7 @@
 import React, { Fragment } from 'react'
+import AppIcon from '../utility-components/AppIcon'
 import { useLocation, useNavigate } from 'react-router-dom'
 
-import { Icon } from 'react-icons-kit'
 import { ic_keyboard_arrow_right } from 'react-icons-kit/md/ic_keyboard_arrow_right'
 
 const BreadcrumbBar = () => {
@@ -108,7 +108,7 @@ const BreadcrumbBar = () => {
                         >
                             {breadcrumbObj.breadcrumb}
                         </div>
-                        <Icon
+                        <AppIcon
                             icon={ic_keyboard_arrow_right}
                             size={12}
                             style={{ marginTop: '-1px', padding: '0 0.25rem' }}

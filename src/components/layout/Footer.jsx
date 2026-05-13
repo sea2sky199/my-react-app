@@ -1,7 +1,7 @@
 import React from 'react'
+import AppIcon from '../utility-components/AppIcon'
 import './layout.css'
 import { version, getChemDWProprietary, siteName } from '../../utilities'
-import { Icon } from 'react-icons-kit'
 import { ic_block } from 'react-icons-kit/md/ic_block'
 function Footer() {
   const classNamesArr = [
@@ -44,7 +44,7 @@ function Footer() {
                     >
                         {`${siteName} ${version}`}
                     </div>
-                    <Icon
+                    <AppIcon
                         icon={ic_block}
                         size={16}
                         style={{ color: '#cb4154', padding: '0 3px' }}

@@ -1,8 +1,8 @@
 import React, { Fragment } from 'react'
+import AppIcon from '../utility-components/AppIcon'
 
 import ContactUsersModal from './ContactUsersModal'
 
-import { Icon } from 'react-icons-kit'
 import { envelopeO } from 'react-icons-kit/fa/envelopeO'
 
 function ContactUsers({users}) {
@@ -15,7 +15,7 @@ function ContactUsers({users}) {
                 onClick={() => setShowing(true)}
             >
                 Contact Users
-                <Icon
+                <AppIcon
                     icon={envelopeO}
                     size={13}
                     style={{

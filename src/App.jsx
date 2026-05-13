@@ -2,6 +2,19 @@ import React from 'react'
 import { Routes, Route, useLocation } from 'react-router-dom'
 import './App.css'
 
+class ErrorBoundary extends React.Component {
+    constructor(props) { super(props); this.state = { error: null } }
+    static getDerivedStateFromError(error) { return { error } }
+    render() {
+        if (this.state.error) {
+            return <div style={{padding:'2rem',color:'red',fontFamily:'monospace',whiteSpace:'pre-wrap'}}>
+                {String(this.state.error)}
+            </div>
+        }
+        return this.props.children
+    }
+}
+
 import { Navbar, BreadcrumbBar, Footer } from './components/layout'
 import { Spinner } from './components/loading-and-error-views'
 import { HomePage } from './components/home'
@@ -20,8 +33,8 @@ function ProtectedRoute({ children, adminOnly, userInfo }) {
             />
         )
     }
-    if (adminOnly && userInfo.role !== 'admin') {
-        return <div className="h3" style={{ padding: '2rem' }}>Access denied.</div>
+    if (adminOnly && userInfo.role?.toUpperCase() !== 'ADMIN') {
+        return <div className="h3" style={{ padding: '2rem' }}>Access denied. Role: {userInfo.role}</div>
     }
     return children
 }
@@ -110,6 +123,7 @@ function App() {
     }
 
     return (
+        <ErrorBoundary>
         <div className="app-container">
             <Navbar userInfoStore={userInfoStore} />
             {location.pathname !== '/' && <BreadcrumbBar />}
@@ -161,13 +175,16 @@ function App() {
                     path="/admin"
                     element={
                         <ProtectedRoute userInfo={userInfo} adminOnly>
-                            <AdminPage />
+                            <ErrorBoundary>
+                                <AdminPage userInfoStore={userInfoStore} />
+                            </ErrorBoundary>
                         </ProtectedRoute>
                     }
                 />
             </Routes>
             <Footer />
         </div>
+        </ErrorBoundary>
     )
 }
 

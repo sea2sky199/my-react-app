@@ -1,7 +1,7 @@
 import React from 'react'
+import AppIcon from '../utility-components/AppIcon'
 import ClickableDiv from '../utility-components/ClickableDiv'
 
-import { Icon } from 'react-icons-kit'
 import { ic_clear } from 'react-icons-kit/md/ic_clear'
 
 const FilterCaption = ({
@@ -24,7 +24,7 @@ const FilterCaption = ({
             name={name}
         >
             <div style={{ maxWidth: '100%' }}>{caption}</div>
-            <Icon icon={ic_clear} size={12} style={{ marginTop: '-2px' }} />
+            <AppIcon icon={ic_clear} size={12} style={{ marginTop: '-2px' }} />
         </ClickableDiv>
     )
 }

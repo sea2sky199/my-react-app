@@ -1,7 +1,7 @@
 import React from 'react'
+import AppIcon from '../utility-components/AppIcon'
 import { DragDropContext, Droppable } from 'react-beautiful-dnd'
 import { ic_settings } from 'react-icons-kit/md/ic_settings'
-import { Icon } from 'react-icons-kit'
 import { debounce } from 'lodash'
 
 import CheckboxColumnItem from './CheckboxColumnItem'
@@ -111,7 +111,7 @@ function ColumnConfig({isSimilarityView, userId, columnsConfigStore}) {
                             setHiddenColumnLabelVisible(false)
                         }
                     >
-                        <Icon icon={ic_settings} />
+                        <AppIcon icon={ic_settings} />
                     </div>
                     {configDropdownVisible && (
                         <DragDropContext

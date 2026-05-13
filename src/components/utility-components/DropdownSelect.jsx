@@ -1,8 +1,8 @@
 import React from 'react'
+import AppIcon from './AppIcon'
 import ClickableDiv from './ClickableDiv'
 import './utilities.css'
 
-import { Icon } from 'react-icons-kit'
 import { elevator } from 'react-icons-kit/iconic/elevator'
 
 function DropdownSelect({options, defaultOption, style, id, formatSelected, selectCallback, formatOption}) {
@@ -48,7 +48,7 @@ function DropdownSelect({options, defaultOption, style, id, formatSelected, sele
                     {formatSelected
                         ? formatSelected(selected)
                         : selected}
-                    <Icon
+                    <AppIcon
                         icon={elevator}
                         size={12}
                         style={{

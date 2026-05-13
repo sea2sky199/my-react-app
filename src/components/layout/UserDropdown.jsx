@@ -1,11 +1,11 @@
 import React, { Fragment } from 'react'
+import AppIcon from '../utility-components/AppIcon'
 
 import FeedbackModal from '../feedback/FeedbackModal'
 import { SubmitCompoundModal } from '../stubs'
 import ClickableDiv from '../utility-components/ClickableDiv'
 import './layout.css'
 
-import { Icon } from 'react-icons-kit'
 import { ic_add } from 'react-icons-kit/md/ic_add'
 
 function UserDropdown({userInfo, reroute}) {
@@ -93,7 +93,7 @@ function UserDropdown({userInfo, reroute}) {
                             clickAction={() => setShowSubmitCompound(true)}
                         >
                             Submit Compound
-                            <Icon
+                            <AppIcon
                                 icon={ic_add}
                                 size={18}
                                 style={{

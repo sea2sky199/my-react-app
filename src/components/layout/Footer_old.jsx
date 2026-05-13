@@ -1,7 +1,7 @@
 import React from 'react'
+import AppIcon from '../utility-components/AppIcon'
 import './layout.css'
 import { version, getChemDWProprietary, siteName } from '../../utilities'
-import { Icon } from 'react-icons-kit'
 import { ic_block } from 'react-icons-kit/md/ic_block'
 function Footer() {
   const [open, setOpen] = React.useState(false);
@@ -21,7 +21,7 @@ function Footer() {
             <div className={classNamesArr.join(' ')}>
                 <div className="flex align-center justify-center nowrap">
                     {`${siteName} ${version} | `}
-                    <Icon
+                    <AppIcon
                         icon={ic_block}
                         size={10}
                         style={{ color: '#cb4154', padding: '0 3px' }}

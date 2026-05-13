@@ -1,8 +1,8 @@
 import React from 'react'
+import AppIcon from '../utility-components/AppIcon'
 
 import { baseImageURL } from '../../utilities'
 
-import { Icon } from 'react-icons-kit'
 import { angleLeft } from 'react-icons-kit/fa/angleLeft'
 import { angleRight } from 'react-icons-kit/fa/angleRight'
 
@@ -113,7 +113,7 @@ function ImageCarousel({imageError, compoundNumberClean}) {
                 {renderArrow(
                     'left',
                     previousSlide,
-                    <Icon
+                    <AppIcon
                         className="carousel-arrow-icon"
                         icon={angleLeft}
                         size={'70'}
@@ -123,7 +123,7 @@ function ImageCarousel({imageError, compoundNumberClean}) {
                 {renderArrow(
                     'right',
                     nextSlide,
-                    <Icon
+                    <AppIcon
                         className="carousel-arrow-icon"
                         icon={angleRight}
                         size="70"

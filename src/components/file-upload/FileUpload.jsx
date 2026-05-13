@@ -1,9 +1,9 @@
 import React from 'react'
+import AppIcon from '../utility-components/AppIcon'
 import './file-upload.css'
 
 import Resumablejs from 'resumablejs'
 
-import { Icon } from 'react-icons-kit'
 import { ic_clear } from 'react-icons-kit/md/ic_clear'
 
 import { hasClass } from '../../utilities'
@@ -111,7 +111,7 @@ function FileUpload({service, query, filetypes, maxFiles, maxFileSize, headerObj
                                 removeFileLocally(event, file, index)
                             }
                         >
-                            <Icon
+                            <AppIcon
                                 icon={ic_clear}
                                 size={12}
                                 style={{ margin: '-2px 5px 0 0' }}

@@ -1,8 +1,8 @@
 import React, { Fragment } from 'react'
+import AppIcon from '../utility-components/AppIcon'
 import { useNavigate, useLocation } from 'react-router-dom'
 
 import _ from 'lodash'
-import { Icon } from 'react-icons-kit'
 import { ic_search } from 'react-icons-kit/md/ic_search'
 import { ic_close } from 'react-icons-kit/md/ic_close'
 import './layout.css'
@@ -151,7 +151,7 @@ function Navbar({userInfoStore}) {
                                 </div>
                             )}
                     </Fragment>
-                    <Icon
+                    <AppIcon
                         id="nav-search-icon"
                         className={
                             searchBarOpen
@@ -162,7 +162,7 @@ function Navbar({userInfoStore}) {
                         size="20"
                         onClick={toggleSearchBar}
                     />
-                    <Icon
+                    <AppIcon
                         className={
                             !searchBarOpen
                                 ? 'search-icon nav-clickable pointer fadeOut'
