@@ -18,7 +18,7 @@ class ApiService {
                 )
         )
         if (isLocalhost) {
-            server = 'http://localhost:8000/api/'
+            server = 'http://localhost:8001/'
         } else {
             server = '/api/'
         }

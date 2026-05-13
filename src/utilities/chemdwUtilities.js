@@ -44,3 +44,9 @@ export {
     getChemdwInfoValue,
     getChemdwAccountingDept
 }
+
+export const getAppSSOAccountingDept = getChemdwAccountingDept
+export const getAppSSOAccountingDeptFromUserInfo = getChemdwAccountingDeptFromUserInfo
+export const getAppSSOInfoValue = getChemdwInfoValue
+export const getAppSSOInfoValueFromUserInfo = getChemdwInfoValueFromUserInfo
+export const getAppSSOUserInfo = userInfo => (userInfo && userInfo['chemdw_meta'] && userInfo['chemdw_meta'].user) || {}

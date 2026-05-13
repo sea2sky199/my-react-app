@@ -3,7 +3,7 @@ import Cell from './Cell'
 import DropdownCell from './DropdownCell'
 import InfoTable from './InfoTable'
 import FilteringRow from './FilteringRow'
-import compoundNumberCell from './CompoundNumberCell'
+import CompoundNumberCell from './CompoundNumberCell'
 import CompoundTableHeadingRow from './CompoundTableHeadingRow'
 import ColumnConfig from './ColumnConfig'
 import CheckboxColumnItem from './CheckboxColumnItem'
@@ -17,7 +17,7 @@ export {
     DropdownCell,
     InfoTable,
     FilteringRow,
-    compoundNumberCell,
+    CompoundNumberCell,
     CompoundTableHeadingRow,
     ColumnConfig,
     CheckboxColumnItem,
