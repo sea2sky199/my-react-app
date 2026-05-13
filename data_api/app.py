@@ -1,5 +1,5 @@
 from os import getenv
-from flask import Flask
+from flask import Flask, jsonify
 from routes import api
 
 
@@ -23,6 +23,18 @@ def create_app():
         response.headers.add('Access-Control-Allow-Methods',
                              'POST, GET, OPTIONS, PUT, DELETE')
         return response
+
+    if getenv('FLASK_ENV') == 'development':
+        @app.route('/userInfo', methods=['GET'])
+        def dev_user_info():
+            return jsonify({
+                'id': 1,
+                'name': 'Dev User',
+                'role': 'ADMIN',
+                'finance_permission': True,
+                'column_config': None,
+                'similarity_column_config': None
+            })
 
     return app
 

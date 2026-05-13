@@ -68,44 +68,37 @@ function App() {
         setSavedConfig: (map) => setSimilarityColumnsConfig(map)
     }
 
-    const apiRequest = async (route, setDataCallback, isDataAlreadyPresent = false) => {
-        if (!isDataAlreadyPresent) {
-            try {
-                const res = await apiService.get(route)
-                setDataCallback(res)
-            } catch (err) {
-                setIsServerDown(true)
-                console.log(`Network Error, unable to get ${route}`, err.message)
+    const getUserInfo = async () => {
+        try {
+            const res = await apiService.get('userInfo')
+            setUserInfo(res || {})
+            if (res && res.column_config) {
+                setCompoundsColumnsConfig(new Map(JSON.parse(res.column_config)))
             }
+            if (res && res.similarity_column_config) {
+                setSimilarityColumnsConfig(new Map(JSON.parse(res.similarity_column_config)))
+            }
+            return res?.role
+        } catch (err) {
+            setIsServerDown(true)
+            console.log('Network Error, unable to get userInfo', err.message)
+            return null
         }
     }
 
-    const getUserInfo = async () => {
-        await apiRequest(
-            'userInfo',
-            res => {
-                setUserInfo(res || {})
-                if (res && res.column_config) {
-                    setCompoundsColumnsConfig(new Map(JSON.parse(res.column_config)))
-                }
-                if (res && res.similarity_column_config) {
-                    setSimilarityColumnsConfig(new Map(JSON.parse(res.similarity_column_config)))
-                }
-            },
-            !!userInfo.role
-        )
-    }
-
-    const getCompoundsSummary = async () => {
-        await apiRequest(
-            'compoundsSummary',
-            res => setSummary(res || {}),
-            !!Object.keys(summary).length
-        )
+    const getCompoundsSummary = async (role) => {
+        if (Object.keys(summary).length) return
+        try {
+            const res = await apiService.post('compounds/summary', { role: role || 'GUEST' })
+            setSummary(res || {})
+        } catch (err) {
+            console.log('Network Error, unable to get compounds/summary', err.message)
+        }
     }
 
     React.useEffect(() => {
-        Promise.all([getUserInfo(), getCompoundsSummary()])
+        getUserInfo()
+            .then(role => getCompoundsSummary(role))
             .then(() => setLoading(false))
     }, [])
 

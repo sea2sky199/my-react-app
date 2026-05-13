@@ -51,7 +51,8 @@ function HomePage({userInfoStore}) {
 
   React.useEffect(() => {
         trackPageView(location.pathname, 'Compound Match - Home')
-        apiService.get('compoundsExplore').then(res => {
+        const role = userInfoStore?.userInfo?.role || 'GUEST'
+        apiService.post('compounds/explore', { role }).then(res => {
             buildDataHeirarchy(res)
         })
   }, []);

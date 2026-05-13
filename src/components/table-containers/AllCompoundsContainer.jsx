@@ -244,11 +244,16 @@ function AllCompoundsContainer({columnsConfigStore, isSimilarityView, compoundIn
         return body
     };
 
+  const getRole = () => userInfoStore?.userInfo?.role || 'GUEST'
+  const getFinancePermission = () => !!(userInfoStore?.userInfo?.finance_permission)
+
   const multiCompoundSelectionViewExportCompoundRequest = () => {
         let reqBody = {
             selected: selectedCompoundStore.selectedcompoundNumbers,
             start: 1,
             limit: selectedCompoundStore.selectedcompoundNumbers.length,
+            role: getRole(),
+            finance_permission: getFinancePermission(),
         }
         if (isSimilarityView) {
             reqBody = {
@@ -257,16 +262,23 @@ function AllCompoundsContainer({columnsConfigStore, isSimilarityView, compoundIn
                 compound_number: compoundInfoForSimilarityView.compoundNumber,
             }
         }
-        return apiService.post('compounds', reqBody)
+        return apiService.post('compounds/', reqBody)
     };
 
   const compoundsRequest = (start, compoundRequestLimit = 25) => {
         const reqBody = getCompoundsRequestBody(start, compoundRequestLimit)
-        return apiService.post('compounds', reqBody)
+        return apiService.post('compounds/', {
+            ...reqBody,
+            role: getRole(),
+            finance_permission: getFinancePermission(),
+        })
     };
 
   const getFilterOptions = async () => {
-        const res = await apiService.get('compoundsMetadata')
+        const res = await apiService.post('compounds/metadata', {
+            role: getRole(),
+            finance_permission: getFinancePermission(),
+        })
 
         if (typeof res !== 'object') {
             throw new Error('Network Error: Please check your connection.')
