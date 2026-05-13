@@ -21,7 +21,7 @@ import { HomePage } from './components/home'
 import { AdminPage } from './components/admin'
 import { HelpCenter } from './components/help-center'
 import { AllCompoundsContainer } from './components/table-containers'
-import { siteName } from './utilities'
+import { siteName, compoundsColumns, similarityColumns } from './utilities'
 import apiService from './data/ApiService'
 
 function ProtectedRoute({ children, adminOnly, userInfo }) {
@@ -43,8 +43,8 @@ function App() {
     const location = useLocation()
     const [userInfo, setUserInfo] = React.useState({})
     const [summary, setSummary] = React.useState({})
-    const [compoundsColumnsConfig, setCompoundsColumnsConfig] = React.useState(new Map())
-    const [similarityColumnsConfig, setSimilarityColumnsConfig] = React.useState(new Map())
+    const [compoundsColumnsConfig, setCompoundsColumnsConfig] = React.useState(compoundsColumns)
+    const [similarityColumnsConfig, setSimilarityColumnsConfig] = React.useState(similarityColumns)
     const [loading, setLoading] = React.useState(true)
     const [isServerDown, setIsServerDown] = React.useState(false)
 
@@ -59,12 +59,14 @@ function App() {
     }
 
     const compoundsColumnsConfigStore = {
-        config: compoundsColumnsConfig,
+        accessors: Array.from(compoundsColumnsConfig.keys()),
+        columnsConfig: compoundsColumnsConfig,
         setSavedConfig: (map) => setCompoundsColumnsConfig(map)
     }
 
     const similarityColumnsConfigStore = {
-        config: similarityColumnsConfig,
+        accessors: Array.from(similarityColumnsConfig.keys()),
+        columnsConfig: similarityColumnsConfig,
         setSavedConfig: (map) => setSimilarityColumnsConfig(map)
     }
 
