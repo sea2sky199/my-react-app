@@ -13,7 +13,6 @@ import {
     toolDescription,
     featureDefinition,
     siteMetrics,
-    exportControl,
     privacyNotice,
     contactUs,
     siteName,
@@ -69,11 +68,6 @@ function HelpCenter({compoundsStore, userInfoStore}) {
                 userInfoStore.userInfo
             ),
             route: 'financial-access'
-        },
-        {
-            heading: 'EXPORT CONTROL',
-            helpPageObj: exportControl,
-            route: 'export-control'
         },
         {
             heading: 'PRIVACY NOTICE',
