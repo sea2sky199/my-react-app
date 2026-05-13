@@ -16,7 +16,6 @@ import {
     privacyNotice,
     contactUs,
     siteName,
-    financialAccessRequirements,
     trackPageView
 } from '../../utilities'
 
@@ -61,13 +60,6 @@ function HelpCenter({compoundsStore, userInfoStore}) {
                 compoundsStore.summary.totalcompounds.count
             ),
             route: 'metrics'
-        },
-        {
-            heading: 'FINANCIAL DATA ACCESS',
-            helpPageObj: financialAccessRequirements(
-                userInfoStore.userInfo
-            ),
-            route: 'financial-access'
         },
         {
             heading: 'PRIVACY NOTICE',
