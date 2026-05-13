@@ -137,8 +137,8 @@ function HelpCenter({compoundsStore, userInfoStore}) {
                         className="flex-column h5 semi-thin letter-spacing"
                         style={{
                             height: '100%',
-                            minWidth: '15rem',
-                            whiteSpace: 'nowrap',
+                            width: '7rem',
+                            minWidth: '7rem',
                             overflowY: 'auto'
                         }}
                     >

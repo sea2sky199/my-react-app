@@ -1,6 +1,7 @@
 import React from 'react'
 import { Routes, Route, useLocation } from 'react-router-dom'
 import './App.css'
+import './design-system.css'
 
 class ErrorBoundary extends React.Component {
     constructor(props) { super(props); this.state = { error: null } }

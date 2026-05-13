@@ -1,0 +1,127 @@
+/* Override Vite template #root styles */
+#root {
+    padding: 0;
+    text-align: left;
+    position: relative; /* makes navbar/breadcrumb width: 100% reference #root, not the viewport */
+}
+
+/* ── Typography scale ──────────────────────────────────────────────────── */
+.h8-5 { font-size: 7px; }
+.h8   { font-size: 8px; }
+.h7-5 { font-size: 9px; }
+.h7   { font-size: 10px; }
+.h6-5 { font-size: 11px; }
+.h6   { font-size: 12px; }
+.h5-5 { font-size: 13px; }
+.h5   { font-size: 14px; }
+.h4-5 { font-size: 15px; }
+.h4   { font-size: 16px; }
+.h3   { font-size: 18px; }
+.h2   { font-size: 20px; }
+.h1-5 { font-size: 21px; }
+.h1   { font-size: 22px; }
+.h0   { font-size: 24px; }
+.h00  { font-size: 30px; }
+
+/* ── Font weights ──────────────────────────────────────────────────────── */
+.thin               { font-weight: 100; }
+.semi-thin          { font-weight: 300; }
+.baseline-font-weight { font-weight: 400; }
+.semi-bold          { font-weight: 500; }
+.bold               { font-weight: 600; }
+
+/* ── Letter spacing ────────────────────────────────────────────────────── */
+.letter-spacing       { letter-spacing: 0.5px; }
+.letter-spacing-large { letter-spacing: 1px; }
+.letter-spacing-none  { letter-spacing: 0; }
+
+/* ── Text / overflow ───────────────────────────────────────────────────── */
+.nowrap      { white-space: nowrap; }
+.wrap-normal { white-space: normal; }
+.overflow-wrap { white-space: normal; }
+
+.might-overflow {
+    text-overflow: ellipsis;
+    overflow: hidden;
+    white-space: nowrap;
+}
+.might-overflow:hover { overflow: visible; }
+
+/* ── Layout flex helpers ───────────────────────────────────────────────── */
+.flex         { display: flex; }
+.flex-reverse { display: flex; flex-direction: row-reverse; }
+.flex-column  { display: flex; flex-direction: column; }
+
+.justify-center { justify-content: center; }
+.justify-end    { justify-content: flex-end; }
+.align-center   { align-items: center; }
+.align-end      { align-items: flex-end; }
+.space-between  { justify-content: space-between; }
+.space-evenly   { justify-content: space-evenly; }
+
+/* ── Spacing / sizing ──────────────────────────────────────────────────── */
+.app-container          { height: 100vh; }
+.padding-top-nav        { padding-top: 10vh; }
+.padding-top-nav-breadcrumb { padding-top: 14vh; }
+.full-page-height       { height: calc(100vh - 5rem); }
+
+/* ── Interaction ───────────────────────────────────────────────────────── */
+.pointer               { cursor: pointer; }
+.pointer-events-none   { pointer-events: none; }
+.pointer-events-initial { pointer-events: initial; }
+
+/* ── Colours ───────────────────────────────────────────────────────────── */
+.pink-primary   { color: #ea3796; }
+.pink-secondary { color: #ef88b8; }
+.error          { color: red; }
+
+/* ── Buttons ───────────────────────────────────────────────────────────── */
+.pink-button {
+    vertical-align: middle;
+    background-color: #ea3796;
+    border: 1px solid #ea3796;
+    color: #ffffff;
+    height: 2rem;
+    padding: 0 1rem;
+    border-radius: 16px;
+}
+.pink-button:hover {
+    background-color: #ef88b8;
+    border: 1px solid #ef88b8;
+}
+.pink-button:focus { outline: none; }
+
+.disabled-button { background-color: #999999; border: 1px solid #999999; }
+.disabled-button:hover { background-color: #999999; border: 1px solid #999999; }
+
+/* ── Misc ──────────────────────────────────────────────────────────────── */
+.img-autosize { height: auto; width: 100%; }
+.align-top    { vertical-align: top; }
+
+.required::after {
+    color: red;
+    content: '*';
+    padding-left: 3px;
+    font-weight: 400;
+}
+
+.text-area {
+    width: 100%;
+    resize: vertical;
+    padding: 0.5rem;
+    border: 0.5px solid #c1c4ce;
+    font-family: Helvetica Neue, Helvetica, Arial, sans serif;
+}
+
+.site-down {
+    color: #ffffff;
+    text-align: center;
+    padding-top: 40vh;
+}
+
+.zoom-hover-image { transition: all 0.3s; transition-delay: 0.5s; }
+.zoom-hover-image:hover {
+    -webkit-transform: scale(2);
+    -ms-transform: scale(2);
+    transform: scale(2);
+}
