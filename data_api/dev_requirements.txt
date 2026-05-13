@@ -1,0 +1,10 @@
+#--index-url=https://compound_catalog:pfZ91sfrXz6AoVAkKndl@web.chemdw.com/artifactory/api/pypi/pypi-remote/simple
+Werkzeug==0.16.1
+flask==1.0.2
+mysql-connector-python==8.0.15
+flask-restx==0.12.1
+cfenv==0.5.3
+pandas==0.23.4
+numpy==1.17.2
+redis==3.2.1
+requests==2.21.0

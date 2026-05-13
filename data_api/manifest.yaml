@@ -1,0 +1,17 @@
+---
+applications:
+  - name: chem-data-app
+    buildpacks:
+      - python_buildpack
+    command: python app.py
+    services:
+      - chem-cache
+    env:
+      PIP_CERT: /etc/ssl/certs/ca-certificates.crt
+      REQUESTS_CA_BUNDLE: /etc/ssl/certs/ca-certificates.crt
+      CHEM_AUTH_TOKEN: ((CHEM_AUTH_TOKEN))
+      FLASK_ENV: ((FLASK_ENV))
+      CHEMDB_UN: ((CHEMDB_UN))
+      CHEMDB_PW: ((CHEMDB_PW))
+      CHEMDB_HOST: ((CHEMDB_HOST))
+      MATTERMOST_WEBHOOK: ((MATTERMOST_WEBHOOK))

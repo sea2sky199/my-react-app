@@ -1,6 +1,12 @@
 # Managed as its own repo
 user_api/
 
+# Python
+data_api/venv/
+data_api/__pycache__/
+data_api/**/__pycache__/
+data_api/**/*.pyc
+
 # Logs
 logs
 *.log
